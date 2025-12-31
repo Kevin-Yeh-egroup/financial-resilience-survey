@@ -58,7 +58,7 @@ export function QuestionnaireForm({ onComplete }: QuestionnaireFormProps) {
     <div className="max-w-3xl mx-auto">
       <div className="mb-8 text-center">
         <h1 className="text-4xl md:text-5xl font-bold mb-4 text-balance text-foreground">財務韌性快速檢視</h1>
-        <p className="text-lg text-muted-foreground text-pretty">透過 10 個簡單問題，了解您的家庭財務健康狀況</p>
+        <p className="text-lg text-muted-foreground text-pretty">透過 10 個簡單問題，了解您的家庭財務韌性</p>
       </div>
 
       <Card className="p-6 md:p-8 bg-card/80 backdrop-blur-sm border-2">
