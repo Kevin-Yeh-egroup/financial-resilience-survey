@@ -3,9 +3,30 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import type { QuestionnaireResult } from "@/types/questionnaire"
-import { RefreshCw } from "lucide-react"
+import { RefreshCw, Building2, Network, Layers, AlertTriangle } from "lucide-react"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts"
+
+// 單一支撐結構插圖（自定義 SVG）
+function SinglePillarIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {/* 地面 */}
+      <rect x="10" y="85" width="80" height="5" fill="currentColor" opacity="0.3" />
+      {/* 單一支柱 */}
+      <rect x="45" y="30" width="10" height="55" fill="currentColor" />
+      {/* 支撐的平台 */}
+      <rect x="35" y="30" width="30" height="8" fill="currentColor" opacity="0.8" />
+      {/* 頂部結構 */}
+      <rect x="40" y="20" width="20" height="10" fill="currentColor" />
+    </svg>
+  )
+}
 
 interface ResultsDisplayProps {
   result: QuestionnaireResult
@@ -17,22 +38,32 @@ const structureTypeConfig = {
   A: {
     name: "單一支撐結構",
     description: "目前家庭的財務狀況，主要仰賴單一條件來維持穩定。\n當這個支撐點運作順利時，生活尚能撐住；\n但一旦出現變動，其他可承接的空間相對有限。",
+    icon: SinglePillarIcon,
+    iconColor: "text-blue-600",
   },
   B: {
     name: "撐著運作結構",
     description: "目前家庭是在努力維持生活運作的狀態，\n多數調整仰賴當下的撐持與應付。\n當狀況穩定時可以繼續前進，但面對突發事件時，調整空間較小。",
+    icon: Building2,
+    iconColor: "text-orange-600",
   },
   C: {
     name: "人脈承接結構",
     description: "雖然目前的財務條件帶來一定壓力，\n但你並不是孤立面對問題。\n願意行動的心態與可連結的支持，\n讓家庭在條件不利時，仍保有調整與修復的可能。",
+    icon: Network,
+    iconColor: "text-purple-600",
   },
   D: {
     name: "多元支撐結構",
     description: "家庭的財務狀況並非完全沒有壓力，\n但同時具備多個可以相互支撐的面向。\n即使其中一項條件出現變動，\n仍有其他力量能協助承接與調整。",
+    icon: Layers,
+    iconColor: "text-green-600",
   },
   E: {
     name: "壓力集中結構",
     description: "目前有多個重要面向同時承受壓力，\n使家庭在面對變動時較難有餘裕調整。\n這樣的狀態，代表需要更多支持與陪伴，\n才能慢慢把壓力拆解開來。",
+    icon: AlertTriangle,
+    iconColor: "text-red-600",
   },
 }
 
@@ -198,14 +229,30 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
 
       {/* 4. 結構型判讀文字（A-E，擇一） */}
       <Card className="p-6 md:p-8 bg-card/80 backdrop-blur-sm border-2">
-        <h3 className="text-xl font-semibold mb-4">結構判讀</h3>
-        <div className="space-y-4">
-          <p className="text-lg font-semibold text-foreground">
-            {structureTypeConfig[result.structureType].name}
-          </p>
-          <p className="text-base leading-relaxed text-foreground whitespace-pre-line">
-            {structureTypeConfig[result.structureType].description}
-          </p>
+        <h3 className="text-xl font-semibold mb-6">結構判讀</h3>
+        <div className="flex flex-col md:flex-row gap-6 items-start">
+          {/* 插圖 */}
+          <div className="flex-shrink-0 flex items-center justify-center w-32 h-32 md:w-40 md:h-40 rounded-lg bg-muted/50 p-4">
+            {(() => {
+              const Icon = structureTypeConfig[result.structureType].icon
+              const iconColor = structureTypeConfig[result.structureType].iconColor
+              // 檢查是否為自定義 SVG 組件（SinglePillarIcon）
+              if (result.structureType === "A") {
+                return <Icon className={iconColor} />
+              }
+              // lucide-react 圖標
+              return <Icon className={`w-full h-full ${iconColor}`} strokeWidth={1.5} />
+            })()}
+          </div>
+          {/* 文字內容 */}
+          <div className="flex-1 space-y-4">
+            <p className="text-lg font-semibold text-foreground">
+              {structureTypeConfig[result.structureType].name}
+            </p>
+            <p className="text-base leading-relaxed text-foreground whitespace-pre-line">
+              {structureTypeConfig[result.structureType].description}
+            </p>
+          </div>
         </div>
       </Card>
 
