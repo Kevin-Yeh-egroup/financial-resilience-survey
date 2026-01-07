@@ -259,8 +259,8 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
             </p>
           )}
         </div>
-        <ChartContainer config={chartConfig} className="h-[400px] w-full">
-          <RadarChart data={radarData} outerRadius="65%">
+        <ChartContainer config={chartConfig} className="h-[450px] w-full">
+          <RadarChart data={radarData} outerRadius="60%">
             <PolarGrid />
             <PolarAngleAxis
               dataKey="dimension"
@@ -363,6 +363,18 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
                   }
                 }
                 
+                // 針對特定維度進行特殊位置調整，確保完整顯示
+                let verticalSpacing = 18 // 預設行距
+                if (payload.value === "收入穩定度") {
+                  // 收入穩定度：往下移更多，確保標題和分數都顯示
+                  offsetY += 60
+                  verticalSpacing = 20 // 增加行距
+                } else if (payload.value === "金錢管理") {
+                  // 金錢管理：往上移更多，確保標題和分數都顯示
+                  offsetY -= 60
+                  verticalSpacing = 20 // 增加行距
+                }
+                
                 const labelX = x + offsetX
                 const labelY = y + offsetY
                 
@@ -383,7 +395,7 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
                       <>
                         <text
                           x={labelX}
-                          y={labelY + 18}
+                          y={labelY + verticalSpacing}
                           fill="#f97316"
                           fontSize={13}
                           fontWeight="bold"
@@ -395,7 +407,7 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
                         {averageScores && (
                           <text
                             x={labelX}
-                            y={labelY + 32}
+                            y={labelY + verticalSpacing * 2}
                             fill="#6b7280"
                             fontSize={11}
                             textAnchor="middle"
