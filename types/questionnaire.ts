@@ -11,18 +11,22 @@ export interface Option {
 }
 
 export interface DimensionScores {
-  收入與穩定性: number
-  儲蓄與突發應對: number
-  債務壓力與風險保障: number
-  金錢管理與金融使用: number
-  支持資源與連結: number
-  心理韌性與未來感: number
+  收入穩定度: number
+  儲備應變力: number
+  債務與保障: number
+  金錢管理: number
+  資源連結: number
+  心理與規劃: number
 }
+
+export type StructureType = "A" | "B" | "C" | "D"
+export type AnimalType = "elephant" | "monkey" | "dog" | "turtle" | "cat"
 
 export interface QuestionnaireResult {
   totalScore: number
   level: "resilient" | "approaching" | "fragile" | "highly-fragile"
   priorities: string[]
   dimensionScores: DimensionScores
-  structureType: "A" | "B" | "C" | "D" | "E"
+  structureType: StructureType
+  animalType: AnimalType
 }

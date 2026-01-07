@@ -5,6 +5,7 @@ import { QuestionnaireForm } from "@/components/questionnaire-form"
 import { ResultsDisplay } from "@/components/results-display"
 import { TransitionAnimation } from "@/components/transition-animation"
 import type { QuestionnaireResult } from "@/types/questionnaire"
+import { saveResult } from "@/lib/storage"
 
 export default function Home() {
   const [result, setResult] = useState<QuestionnaireResult | null>(null)
@@ -12,6 +13,8 @@ export default function Home() {
   const [pendingResult, setPendingResult] = useState<QuestionnaireResult | null>(null)
 
   const handleComplete = (completedResult: QuestionnaireResult) => {
+    // 儲存結果到本地儲存
+    saveResult(completedResult.dimensionScores)
     // 先顯示轉換動畫，保存結果
     setPendingResult(completedResult)
     setShowTransition(true)
