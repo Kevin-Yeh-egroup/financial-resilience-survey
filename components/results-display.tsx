@@ -4,31 +4,10 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import type { QuestionnaireResult, DimensionScores } from "@/types/questionnaire"
-import { RefreshCw, Building2, Network, Layers, AlertTriangle } from "lucide-react"
+import { RefreshCw } from "lucide-react"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts"
 import { calculateAverageScores, getStatistics } from "@/lib/storage"
-
-// 單一支撐結構插圖（自定義 SVG）
-function SinglePillarIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      {/* 地面 */}
-      <rect x="10" y="85" width="80" height="5" fill="currentColor" opacity="0.3" />
-      {/* 單一支柱 */}
-      <rect x="45" y="30" width="10" height="55" fill="currentColor" />
-      {/* 支撐的平台 */}
-      <rect x="35" y="30" width="30" height="8" fill="currentColor" opacity="0.8" />
-      {/* 頂部結構 */}
-      <rect x="40" y="20" width="20" height="10" fill="currentColor" />
-    </svg>
-  )
-}
 
 interface ResultsDisplayProps {
   result: QuestionnaireResult
@@ -42,7 +21,7 @@ const structureTypeConfig = {
     subtitle: "單一支撐型｜高風險",
     description: "目前生活主要仰賴一個穩定但關鍵的來源來支撐，例如固定薪資或單一工作收入。日常開銷大致能應付，但在儲蓄、可求助的支持系統，以及面對財務問題的信心上相對不足。這樣的狀態下，只要這個主要來源出現變動，例如加班減少、工作調整或短期失去收入，壓力就會快速集中，讓人措手不及。問題不在於你不努力，而是缺乏其他可以分擔風險的支撐。",
     summary: "現在撐得住，但所有重量都壓在同一個地方。",
-    icon: SinglePillarIcon,
+    image: "/只能依靠自己的.png",
     iconColor: "text-red-600",
     bgColor: "bg-red-50 dark:bg-red-950/20",
   },
@@ -51,7 +30,7 @@ const structureTypeConfig = {
     subtitle: "撐著型｜中高風險",
     description: "目前的生活是在努力維持平衡的狀態，收入可能不太穩定，儲蓄不多，對金錢安排與未來的掌握感有限。像是臨時需要修車、醫療支出或家庭突發狀況時，往往會讓整個生活節奏被打亂。這不是因為你不夠節制或不夠努力，而是本來就沒有太多可以調整或緩衝的空間。長期下來，身心都容易感到疲累。",
     summary: "一直在撐，但真的很難喘口氣。",
-    icon: Building2,
+    image: "/勉強撐著的.png",
     iconColor: "text-orange-600",
     bgColor: "bg-orange-50 dark:bg-orange-950/20",
   },
@@ -60,7 +39,7 @@ const structureTypeConfig = {
     subtitle: "人脈承接型｜中低風險",
     description: "雖然收入不穩或債務壓力存在，但你並不是一個人面對這些問題。身邊可能有家人、朋友、社工或其他資源，能夠一起討論、提供建議，甚至在關鍵時刻伸出援手。同時，你對改變現況仍抱有信心，也願意嘗試調整做法。這讓你即使條件不理想，仍有慢慢修復與轉圜的可能。",
     summary: "條件辛苦，但你不是獨自承擔。",
-    icon: Network,
+    image: "/有人接住的.png",
     iconColor: "text-yellow-600",
     bgColor: "bg-yellow-50 dark:bg-yellow-950/20",
   },
@@ -69,7 +48,7 @@ const structureTypeConfig = {
     subtitle: "多元支撐型｜低風險",
     description: "你的生活並不是只靠單一條件支撐，而是由多個面向一起撐住，例如有基本儲蓄、有人可以討論、也清楚錢該怎麼安排。即使收入不是特別高，遇到像是收入波動或臨時支出時，仍有其他方式可以接住，不至於一次失衡。這是一種相對穩定、可長期調整的結構。",
     summary: "有幾個支撐點，整體比較安心。",
-    icon: Layers,
+    image: "/有很多依靠的.png",
     iconColor: "text-green-600",
     bgColor: "bg-green-50 dark:bg-green-950/20",
   },
@@ -81,7 +60,8 @@ const animalTypeConfig = {
     name: "站在細繩上的大象",
     subtitle: "結構型脆弱",
     description: "你其實很有能力，也承擔了不少責任，像是家庭經濟、工作表現或照顧他人。收入看起來穩定，但目前所有支撐幾乎都集中在同一個地方，其他面向如儲蓄、支持或心理緩衝相對薄弱。這會讓人表面看起來很穩，內心卻常感到緊繃，因為知道一旦失衡，後果會很重。",
-    summary: "不是你不行，而是承重太集中。",
+    advantage: "具備明確且穩定的承載能力，短期內能撐住生活。",
+    risk: "支撐點過於集中，缺乏其他面向分擔衝擊。",
     emoji: "🐘",
     image: "/大象.png", // 圖片路徑
     color: "text-blue-600",
@@ -90,7 +70,8 @@ const animalTypeConfig = {
     name: "在樹間移動的猴子",
     subtitle: "社會韌性型",
     description: "即使收入不穩、債務壓力偏高，你仍懂得透過人際連結來找出路，例如找人討論、請教經驗，或嘗試不同的應對方式。你不一定條件最好，但有彈性、有行動力，願意在不同支點之間移動，為自己創造調整的空間。",
-    summary: "靠連結換位置，路就不只一條。",
+    advantage: "支持系統強，遇到困難時不容易孤立無援。",
+    risk: "若長期缺乏結構改善，容易消耗人際與心理能量。",
     emoji: "🐒",
     image: "/猴子.png", // 圖片路徑
     color: "text-purple-600",
@@ -99,7 +80,8 @@ const animalTypeConfig = {
     name: "準備出發的小狗",
     subtitle: "心理啟動型",
     description: "你已經意識到需要改變，也對未來抱有期待，只是目前在金錢管理與儲備上還缺乏具體的方法。像是想開始記帳、規劃支出，但不知道從哪一步下手。這代表動機已經出現，只要有人陪你整理方向、提供工具，就能慢慢走起來。",
-    summary: "有心想走，正在學怎麼走。",
+    advantage: "改變的動機與信心已啟動。",
+    risk: "若缺乏方法與支持，行動容易停留在想法階段。",
     emoji: "🐕",
     image: "/小狗.png", // 圖片路徑
     color: "text-amber-600",
@@ -107,8 +89,9 @@ const animalTypeConfig = {
   turtle: {
     name: "穩定前行的烏龜",
     subtitle: "隱性韌性型",
-    description: "你的狀況沒有特別亮眼的優勢，也沒有明顯的危險訊號，各個面向都落在中間值。生活節奏可能不快，但不容易因單一事件而大幅失衡。這樣的狀態適合慢慢調整與準備，而不是急著做大改變。",
-    summary: "不快，但走得久。",
+    description: "你的狀況沒有特別亮眼的優勢，也沒有明顯的危險訊號，各個面向都落在中間值。生活節奏可能不快，但不容易因單一事件而大幅失衡。這樣的狀態適合慢慢調整與準備，而不是急著做大改變，長遠風險可能出現壓力，需要定時盤點調整。",
+    advantage: "結構平衡，不易大幅波動。",
+    risk: "若缺乏主動準備，可能錯過提前強化的時機。",
     emoji: "🐢",
     image: "/烏龜.png", // 圖片路徑
     color: "text-green-600",
@@ -117,7 +100,8 @@ const animalTypeConfig = {
     name: "縮成一團休息的貓",
     subtitle: "高風險疊加型",
     description: "目前同時承受多項壓力，例如儲蓄不足、債務負擔、支持較少，以及對未來缺乏信心。這會讓人感到疲憊、退縮，甚至不想再多想下一步。這不是能力問題，而是負荷真的太重。此刻最重要的不是再撐，而是先被接住、慢慢恢復。",
-    summary: "不是撐不住，是現在需要休息。",
+    advantage: "具備自我保護的本能，能暫停避免進一步消耗。",
+    risk: "若長期缺乏外部支持，恢復與重建會變得困難。",
     emoji: "🐱",
     image: "/貓.png", // 圖片路徑
     color: "text-red-600",
@@ -503,16 +487,13 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
         <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
           {/* 插圖 - 佔一半 */}
           <div className="w-full md:w-1/2 flex items-center justify-center rounded-lg bg-muted/50 p-4 min-h-[200px] md:min-h-[250px]">
-            {(() => {
-              const Icon = structureTypeConfig[result.structureType].icon
-              const iconColor = structureTypeConfig[result.structureType].iconColor
-              // 檢查是否為自定義 SVG 組件（SinglePillarIcon）
-              if (result.structureType === "A") {
-                return <Icon className={`${iconColor} w-full h-full max-w-[200px] max-h-[200px]`} />
-              }
-              // lucide-react 圖標
-              return <Icon className={`w-full h-full max-w-[200px] max-h-[200px] ${iconColor}`} strokeWidth={1.5} />
-            })()}
+            {structureTypeConfig[result.structureType].image ? (
+              <img
+                src={structureTypeConfig[result.structureType].image!}
+                alt={structureTypeConfig[result.structureType].name}
+                className="w-full h-full max-w-[200px] max-h-[200px] object-contain"
+              />
+            ) : null}
           </div>
           {/* 文字內容 - 佔一半 */}
           <div className="w-full md:w-1/2 space-y-3">
@@ -576,11 +557,25 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
             <p className="text-base leading-relaxed text-foreground">
               {animalTypeConfig[result.animalType].description}
             </p>
-            <div className="mt-4 p-4 rounded-lg bg-muted/30 border-l-4 border-primary">
-              <p className="text-base font-medium text-foreground italic">
-                {animalTypeConfig[result.animalType].summary}
-              </p>
-            </div>
+          </div>
+        </div>
+        {/* 優勢與風險 - 放在圖片和敘述之下 */}
+        <div className="mt-6 space-y-3">
+          <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border-l-4 border-emerald-500">
+            <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 mb-2">
+              優勢
+            </p>
+            <p className="text-base text-foreground">
+              {animalTypeConfig[result.animalType].advantage}
+            </p>
+          </div>
+          <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-950/20 border-l-4 border-orange-500">
+            <p className="text-sm font-semibold text-orange-700 dark:text-orange-400 mb-2">
+              風險
+            </p>
+            <p className="text-base text-foreground">
+              {animalTypeConfig[result.animalType].risk}
+            </p>
           </div>
         </div>
       </Card>

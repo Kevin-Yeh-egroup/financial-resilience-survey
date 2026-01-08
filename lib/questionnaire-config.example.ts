@@ -118,3 +118,4 @@ export type QuestionnaireConfig = typeof questionnaireConfig
 export type StructureType = keyof typeof structureTypeConfig
 
 
+
