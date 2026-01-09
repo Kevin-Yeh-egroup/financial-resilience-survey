@@ -14,7 +14,7 @@ interface ResultsDisplayProps {
   onReset: () => void
 }
 
-// 結構判讀形容詞（A-D）
+// 結構判讀形容詞（A-F）
 const structureTypeConfig = {
   A: {
     name: "只能依靠自己的",
@@ -52,9 +52,27 @@ const structureTypeConfig = {
     iconColor: "text-green-600",
     bgColor: "bg-green-50 dark:bg-green-950/20",
   },
+  E: {
+    name: "有資源卻卡住的",
+    subtitle: "資源存在，但無法動用型",
+    description: "家庭表面上具備某些可用資源，例如收入、帳戶、保險、制度或支持對象，但因金錢管理能力不足、對財務問題缺乏信心，這些資源無法被實際動用或轉換為有效承接力。此類型的風險不在於資源缺乏，而在於「結構卡在啟動前一刻」，導致遇到壓力時仍只能被動承受。",
+    summary: "東西都有，卻用不起來的。",
+    image: "/有資源卻卡住的.png",
+    iconColor: "text-purple-600",
+    bgColor: "bg-purple-50 dark:bg-purple-950/20",
+  },
+  F: {
+    name: "一直被拖回原點的",
+    subtitle: "循環消耗型",
+    description: "家庭長期處於債務、壓力與管理困難交織的狀態，即使曾短暫改善或有人協助，仍容易因壓力反覆累積而回到原本的高風險結構。此類型的特徵不是單一弱項，而是多個弱點形成自我消耗的結構循環，使任何調整都難以持續。",
+    summary: "怎麼調整都回到原來的。",
+    image: "/一直被拖回原點的.png",
+    iconColor: "text-rose-600",
+    bgColor: "bg-rose-50 dark:bg-rose-950/20",
+  },
 }
 
-// 狀態理解動物（5 類）
+// 狀態理解動物（8 類）
 const animalTypeConfig = {
   elephant: {
     name: "站在細繩上的大象",
@@ -105,6 +123,36 @@ const animalTypeConfig = {
     emoji: "🐱",
     image: "/貓.png", // 圖片路徑
     color: "text-red-600",
+  },
+  bear: {
+    name: "慢慢探出頭的小熊",
+    subtitle: "恢復中的狀態",
+    description: "你正從一段壓力較高的財務狀態慢慢走出來，雖然整體還沒完全穩定，但已經開始面對問題、嘗試調整，改變的速度不快，卻是真實存在的。",
+    advantage: "已出現行動或心態轉變的跡象；不再完全逃避或否認財務問題；只要持續累積，小改變會慢慢變成穩定。",
+    risk: "進展慢，容易被自己或他人低估；若缺乏肯定或陪伴，可能中途退回原狀。",
+    emoji: "🐻",
+    image: "/熊.png", // 圖片路徑
+    color: "text-yellow-600",
+  },
+  ant: {
+    name: "努力拖著家的小螞蟻",
+    subtitle: "撐得很用力的狀態",
+    description: "你目前還能撐住家庭的日常運作，但多數責任與壓力集中在自己身上，每天都在用力維持，幾乎沒有真正喘息的空間。",
+    advantage: "責任感強，願意為家庭承擔；在資源有限下仍持續前進；是很多家庭度過困難時期的重要力量。",
+    risk: "長期消耗，容易突然撐不住；若沒有外部支持，壓力會快速累積。",
+    emoji: "🐜",
+    image: "/螞蟻.png", // 圖片路徑
+    color: "text-orange-600",
+  },
+  squirrel: {
+    name: "躲在葉子下的小松鼠",
+    subtitle: "有保護、但暫時受傷的狀態",
+    description: "你原本具備一定的能力、支持或準備，但近期因突發事件受到衝擊，選擇先縮起來保護自己，等待狀況好轉。",
+    advantage: "基礎條件仍在，並非從零開始；知道在受傷時先停下來休息；有機會在事件過後回到穩定狀態。",
+    risk: "若停留太久，可能錯過重新調整的時機；容易被誤判為長期高風險狀態。",
+    emoji: "🐿️",
+    image: "/松鼠.png", // 圖片路徑
+    color: "text-yellow-600",
   },
 }
 
