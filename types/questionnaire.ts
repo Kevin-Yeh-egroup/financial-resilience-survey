@@ -19,8 +19,8 @@ export interface DimensionScores {
   心理與規劃: number
 }
 
-export type StructureType = "A" | "B" | "C" | "D" | "E" | "F"
-export type AnimalType = "elephant" | "monkey" | "dog" | "turtle" | "cat" | "bear" | "ant" | "squirrel"
+export type StructureType = "cycle" | "single" | "struggling" | "stuck" | "supported" | "stable" | "growing" | "mature"
+export type AnimalType = "cat" | "ant" | "elephant" | "ox" | "camel" | "otter" | "monkey" | "squirrel" | "bear" | "dog" | "eagle" | "turtle"
 
 export interface QuestionnaireResult {
   totalScore: number

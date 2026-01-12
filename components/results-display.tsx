@@ -14,145 +14,219 @@ interface ResultsDisplayProps {
   onReset: () => void
 }
 
-// 結構判讀形容詞（A-F）
+// 結構判讀形容詞（優先覆蓋制，由最脆弱到最成熟）
 const structureTypeConfig = {
-  A: {
-    name: "只能依靠自己的",
-    subtitle: "單一支撐型｜高風險",
-    description: "目前生活主要仰賴一個穩定但關鍵的來源來支撐，例如固定薪資或單一工作收入。日常開銷大致能應付，但在儲蓄、可求助的支持系統，以及面對財務問題的信心上相對不足。這樣的狀態下，只要這個主要來源出現變動，例如加班減少、工作調整或短期失去收入，壓力就會快速集中，讓人措手不及。問題不在於你不努力，而是缺乏其他可以分擔風險的支撐。",
-    summary: "現在撐得住，但所有重量都壓在同一個地方。",
-    image: "/只能依靠自己的.png",
-    iconColor: "text-red-600",
-    bgColor: "bg-red-50 dark:bg-red-950/20",
-  },
-  B: {
-    name: "勉強撐著的",
-    subtitle: "撐著型｜中高風險",
-    description: "目前的生活是在努力維持平衡的狀態，收入可能不太穩定，儲蓄不多，對金錢安排與未來的掌握感有限。像是臨時需要修車、醫療支出或家庭突發狀況時，往往會讓整個生活節奏被打亂。這不是因為你不夠節制或不夠努力，而是本來就沒有太多可以調整或緩衝的空間。長期下來，身心都容易感到疲累。",
-    summary: "一直在撐，但真的很難喘口氣。",
-    image: "/勉強撐著的.png",
-    iconColor: "text-orange-600",
-    bgColor: "bg-orange-50 dark:bg-orange-950/20",
-  },
-  C: {
-    name: "有人接住的",
-    subtitle: "人脈承接型｜中低風險",
-    description: "雖然收入不穩或債務壓力存在，但你並不是一個人面對這些問題。身邊可能有家人、朋友、社工或其他資源，能夠一起討論、提供建議，甚至在關鍵時刻伸出援手。同時，你對改變現況仍抱有信心，也願意嘗試調整做法。這讓你即使條件不理想，仍有慢慢修復與轉圜的可能。",
-    summary: "條件辛苦，但你不是獨自承擔。",
-    image: "/有人接住的.png",
-    iconColor: "text-yellow-600",
-    bgColor: "bg-yellow-50 dark:bg-yellow-950/20",
-  },
-  D: {
-    name: "有很多依靠的",
-    subtitle: "多元支撐型｜低風險",
-    description: "你的生活並不是只靠單一條件支撐，而是由多個面向一起撐住，例如有基本儲蓄、有人可以討論、也清楚錢該怎麼安排。即使收入不是特別高，遇到像是收入波動或臨時支出時，仍有其他方式可以接住，不至於一次失衡。這是一種相對穩定、可長期調整的結構。",
-    summary: "有幾個支撐點，整體比較安心。",
-    image: "/有很多依靠的.png",
-    iconColor: "text-green-600",
-    bgColor: "bg-green-50 dark:bg-green-950/20",
-  },
-  E: {
-    name: "有資源卻卡住的",
-    subtitle: "資源存在，但無法動用型",
-    description: "家庭表面上具備某些可用資源，例如收入、帳戶、保險、制度或支持對象，但因金錢管理能力不足、對財務問題缺乏信心，這些資源無法被實際動用或轉換為有效承接力。此類型的風險不在於資源缺乏，而在於「結構卡在啟動前一刻」，導致遇到壓力時仍只能被動承受。",
-    summary: "東西都有，卻用不起來的。",
-    image: "/有資源卻卡住的.png",
-    iconColor: "text-purple-600",
-    bgColor: "bg-purple-50 dark:bg-purple-950/20",
-  },
-  F: {
-    name: "一直被拖回原點的",
-    subtitle: "循環消耗型",
-    description: "家庭長期處於債務、壓力與管理困難交織的狀態，即使曾短暫改善或有人協助，仍容易因壓力反覆累積而回到原本的高風險結構。此類型的特徵不是單一弱項，而是多個弱點形成自我消耗的結構循環，使任何調整都難以持續。",
+  cycle: {
+    name: "循環消耗",
+    subtitle: "結構會吃掉改善成果",
+    description: "緩衝不足、風險暴露高、調節能力低、支持薄弱，形成壓力反覆累積的自我耗損循環。即使短期有收入或協助挹注，結構本身仍會快速把改善吃掉。",
     summary: "怎麼調整都回到原來的。",
+    advantage: "你對自己的困難其實很清楚，也知道現在真的很不容易。當有人願意陪你一起看清現況時，改變的可能性是存在的。",
+    risk: "多個壓力同時存在，容易一件事接一件事發生。如果沒有外部協助與支持，情況可能會惡化得很快。",
     image: "/一直被拖回原點的.png",
     iconColor: "text-rose-600",
     bgColor: "bg-rose-50 dark:bg-rose-950/20",
   },
+  single: {
+    name: "單一支撐",
+    subtitle: "只靠單一支柱在撐",
+    description: "家庭運作高度依賴單一支點，缺乏儲備、支持或心理緩衝作為第二、第三層承接。",
+    summary: "現在撐得住，但所有重量都壓在同一個地方。",
+    advantage: "你有一個相對穩定的支撐來源（多半是工作或固定收入）。生活目前還能維持基本運作。",
+    risk: "太多事情都壓在同一個支點上，一旦這個支點出問題，影響會很大。需要慢慢建立儲備與第二層支持，避免所有風險集中在一處。",
+    image: "/只能依靠自己的.png",
+    iconColor: "text-red-600",
+    bgColor: "bg-red-50 dark:bg-red-950/20",
+  },
+  struggling: {
+    name: "吃力支撐",
+    subtitle: "多面向邁入風險、但尚未崩潰",
+    description: "生活仍可運作，但各面向緩衝與彈性不足，屬於長期壓力堆積、靠意志力與日常應付在撐的狀態。",
+    summary: "一直在撐，但真的很難喘口氣。",
+    advantage: "生活雖然吃力，但還沒有完全失去控制。你仍在努力維持秩序，也有調整的空間。",
+    risk: "緩衝不夠，一次大的支出或變動就可能讓壓力明顯升高。長期這樣撐，容易身心疲累，卻來不及準備下一步。",
+    image: "/勉強撐著的.png",
+    iconColor: "text-orange-600",
+    bgColor: "bg-orange-50 dark:bg-orange-950/20",
+  },
+  stuck: {
+    name: "資源卡住",
+    subtitle: "有資源，但無法動用",
+    description: "表面上具備一定收入或可求助的資源，但因管理能力不足、信心低落或啟動困難，這些資源無法被有效轉換為實際的安全網。遇到壓力時仍以被動承受為主，結構卡在「有可能改善，但尚未啟動」的狀態。",
+    summary: "東西都有，卻用不起來的。",
+    advantage: "其實身邊或環境中已有可用的資源與機會。只要能把方法與信心建立起來，改善的起點並不遠。",
+    risk: "因缺乏方向感或實際做法，資源長期無法轉為真正的幫助。若持續停留在「知道有路，但走不出去」的狀態，壓力會慢慢累積。",
+    image: "/有資源卻卡住的.png",
+    iconColor: "text-purple-600",
+    bgColor: "bg-purple-50 dark:bg-purple-950/20",
+  },
+  supported: {
+    name: "人脈承接",
+    subtitle: "有人接住，但結構未必穩",
+    description: "即使在收入、儲蓄或債務上承受壓力，家庭仍擁有可商量、可求助、可陪伴的支持網絡，加上內在仍保有行動信心與方向感，形成重要的「承接層」。風險不一定低，但不會孤立無援。",
+    summary: "條件辛苦，但你不是獨自承擔。",
+    advantage: "身邊有人可以討論、商量或在關鍵時刻提供支持。內心仍保有面對問題與調整的力量。",
+    risk: "若長期只靠他人撐住，而沒有同步補強收入、儲備與管理能力，容易形成依賴，一旦支持減弱，壓力會一下子集中回自己身上。",
+    image: "/有人接住的.png",
+    iconColor: "text-yellow-600",
+    bgColor: "bg-yellow-50 dark:bg-yellow-950/20",
+  },
+  stable: {
+    name: "日常穩定",
+    subtitle: "多數家庭的基準狀態",
+    description: "生活可正常運作，帳單繳得出來，對未來有基本方向感，也具備基礎管理能力與支持來源。然而儲備不厚、承接層數有限，整體仍屬「低緩衝穩定」，一旦遇到連續壓力事件，容易從穩定迅速轉為吃力。",
+    summary: "有幾個支撐點，整體比較安心。",
+    advantage: "生活運作大致穩定，收支與日常安排在可掌握範圍內。對未來有基本方向感，也具備一定的調整能力。",
+    risk: "儲備與安全邊際不厚實，遇到連續的變動或突發事件時，容易從「還可以」很快變成「開始吃力」。",
+    image: "/有很多依靠的.png",
+    iconColor: "text-green-600",
+    bgColor: "bg-green-50 dark:bg-green-950/20",
+  },
+  growing: {
+    name: "成長建構",
+    subtitle: "結構逐漸成長，邁向穩健",
+    description: "家庭已不再只是「撐著過日子」，而是開始有意識地整理方向、累積能力與建立第二層承接。內在動機與信心穩定，知道自己要往哪裡走，也開始嘗試把收入、支出、儲備與資源連結起來。雖然緩衝仍未厚實，但結構已進入「可成長、可建構」的上升軌道。",
+    summary: "不只是撐著，而是正在長出來。",
+    advantage: "已開始有計畫地整理財務、思考未來方向。內在動機與學習意願穩定，支持與工具也逐步到位。",
+    risk: "若缺乏持續行動與制度化習慣，成長可能停留在嘗試階段。中途鬆手，容易退回原本只是撐著或日常穩定的狀態。",
+    image: "/結構正在長出來的.png",
+    iconColor: "text-blue-600",
+    bgColor: "bg-blue-50 dark:bg-blue-950/20",
+  },
+  mature: {
+    name: "成熟穩健",
+    subtitle: "多元資源承接，財務結構穩健",
+    description: "家庭的穩定不是靠單一收入或單一關係撐住，而是由多個支柱共同承接：有足夠的緩衝儲備、有人可商量與動員、也有清楚的方向感與調整能力。即使某一面向短暫波動，其他結構仍能分攤衝擊，屬於安全邊際厚、承接網絡成熟、整體韌性穩健的狀態。",
+    summary: "多個支撐點，形成穩健的網狀結構。",
+    advantage: "不只靠單一收入或單一對象，而是有儲備、有支持、有規劃，多個面向一起形成穩定的承接網。面對變動時，通常有時間與空間調整，不容易被一次事件打垮。",
+    risk: "長期穩定下，可能對風險變化的警覺度降低。需要持續關注環境與家庭階段變化，避免過度依賴既有的穩定模式。",
+    image: "/成熟穩健.png",
+    iconColor: "text-emerald-600",
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/20",
+  },
 }
 
-// 狀態理解動物（8 類）
+// 狀態理解動物（12 類）
 const animalTypeConfig = {
+  cat: {
+    name: "縮成一團休息的貓",
+    subtitle: "高風險疊加型",
+    description: "你目前同時承受著多個層面的壓力，無論是儲蓄、債務、支持系統或心理狀態，都處在相當吃緊的狀況。像一隻縮成一團休息的貓，你的身體與內心都在提醒：現在已經沒有多餘的空間再承擔新的變動。生活中任何突發狀況，都可能讓原本勉強維持的平衡被打破。這並不代表你不努力，而是代表你已經撐了很久，系統性的緩衝與支撐變得很薄。此刻最重要的不是再要求自己多做一點，而是讓壓力被看見、讓資源與支持能夠進來，先讓整個人重新感到安全。",
+    advantage: "對自身困境高度有感，對風險的警覺性高。一旦獲得適當支持，通常願意配合調整與求助。",
+    risk: "多重壓力疊加，財務與心理脆弱度高。若缺乏即時介入與資源連結，容易快速惡化為急難或創傷狀態。",
+    emoji: "🐱",
+    image: "/貓.png",
+    color: "text-red-600",
+  },
+  ant: {
+    name: "努力拖著家的小螞蟻",
+    subtitle: "透支撐持型",
+    description: "你像一隻不停搬運食物的小螞蟻，家庭仍能運作，責任仍在肩上，帳單繳得出來、工作也還撐著，但幾乎沒有緩衝空間。儲蓄接近用盡，一有突發支出就會感到心驚，內心長期處在緊繃與疲勞中，也很少有可以分擔或討論的對象。你靠的是責任感與意志力在支撐日常，而不是充足的安全網。這是一種「還在跑，但已經在透支」的狀態，外表看起來穩定，其實內在非常消耗。",
+    advantage: "責任感強、執行力高，能在壓力下維持家庭基本運作。對工作與家庭承諾度高，不輕易放棄。",
+    risk: "緩衝極低，任何失業、疾病或意外都可能瞬間失衡。長期心理耗損，若未補充支持，容易出現身心俱疲或決策失誤。",
+    emoji: "🐜",
+    image: "/螞蟻.png",
+    color: "text-orange-600",
+  },
   elephant: {
     name: "站在細繩上的大象",
     subtitle: "結構型脆弱",
-    description: "你其實很有能力，也承擔了不少責任，像是家庭經濟、工作表現或照顧他人。收入看起來穩定，但目前所有支撐幾乎都集中在同一個地方，其他面向如儲蓄、支持或心理緩衝相對薄弱。這會讓人表面看起來很穩，內心卻常感到緊繃，因為知道一旦失衡，後果會很重。",
-    advantage: "具備明確且穩定的承載能力，短期內能撐住生活。",
-    risk: "支撐點過於集中，缺乏其他面向分擔衝擊。",
+    description: "你就像一頭站在細繩上的大象，體型龐大、能力不弱，收入結構看似穩定，但實際支撐點卻非常狹窄。儲蓄不厚、心理壓力沉重，或是幾乎沒有可以依靠的支持網絡。整體看起來還站得住，其實平衡非常吃力，只要一點點風吹草動，就可能晃得很厲害。這是一種「表面穩定、底層支撐薄弱」的狀態。",
+    advantage: "具備維持基本生活的經濟結構。短期內仍有運作能力，不易立即崩潰。",
+    risk: "安全邊際極小，抗風險能力不足。心理或社會支持缺口大時，容易在突發事件下快速滑落。",
     emoji: "🐘",
-    image: "/大象.png", // 圖片路徑
+    image: "/大象.png",
+    color: "text-blue-600",
+  },
+  ox: {
+    name: "努力負重的牛",
+    subtitle: "高負荷撐持型",
+    description: "你像一頭默默前行、背著重擔的牛，家庭運作穩定、責任清楚，外表看起來很能撐。但實際上儲備不算充足，支援網絡有限，所有重量幾乎都壓在自己身上。你不太喊累，習慣告訴自己再忍一下就好，卻在不知不覺中承受著長期高負荷。這是一種「穩定但很重」的狀態，結構還在，但彈性正在慢慢被消耗。",
+    advantage: "穩定度高、責任感強，能長期維持家庭運作。心理尚能撐住，具備調整與持續前行的能力。",
+    risk: "長期負荷集中於個人，缺乏支持與緩衝。若未補強儲備與資源，突發事件可能造成結構性斷裂。",
+    emoji: "🐂",
+    image: "/牛.png",
+    color: "text-orange-600",
+  },
+  camel: {
+    name: "撐很久的駱駝",
+    subtitle: "慢性全面吃力型",
+    description: "你像一隻在沙漠中長途跋涉的駱駝，沒有立即的危機，但也沒有真正的綠洲。收入、儲蓄、保障、管理、心理與支持網絡都處在「還撐得住，但很吃力」的狀態。生活能運作，卻幾乎沒有餘裕，任何額外的負擔都需要精打細算。你已經習慣在有限資源下忍耐與調適，外表看起來穩定，其實長期處在慢性耗損中。這是一種沒有崩潰、但也沒有安全感的持續消耗狀態。",
+    advantage: "耐力高、適應力強，能在資源有限下長期維持運作。面對壓力時不易立即崩解。",
+    risk: "長期慢性壓力累積，易出現身心與財務的同步耗竭。若缺乏補給與轉換機制，容易在看似穩定中突然失速。",
+    emoji: "🐪",
+    image: "/駱駝.png",
+    color: "text-yellow-600",
+  },
+  otter: {
+    name: "被照顧著的水獺",
+    subtitle: "依賴型安全網",
+    description: "你像漂浮在水面、被同伴托著的水獺，身邊有親友、制度或補助資源支持，讓生活不至於沉沒。當遇到困難時，總有人或系統能接住你，使基本安全得以維持。然而，自身的收入穩定度、儲蓄能力或金錢管理仍在建立中，內在的安全感很大一部分來自外界的照顧與支撐。只要支持網絡存在，你就能安心浮著；但一旦資源減弱，自我結構尚不足以讓你獨自游得很遠。",
+    advantage: "支持網絡豐富，不易完全陷入孤立或斷援狀態。對外部協助的接受度高，較不排斥求助。",
+    risk: "若長期停留在被支撐狀態，自立能力與財務韌性成長緩慢。當支持系統變動時，容易出現安全感快速下滑。",
+    emoji: "🦭",
+    image: "/水獺.png",
     color: "text-blue-600",
   },
   monkey: {
     name: "在樹間移動的猴子",
     subtitle: "社會韌性型",
-    description: "即使收入不穩、債務壓力偏高，你仍懂得透過人際連結來找出路，例如找人討論、請教經驗，或嘗試不同的應對方式。你不一定條件最好，但有彈性、有行動力，願意在不同支點之間移動，為自己創造調整的空間。",
-    advantage: "支持系統強，遇到困難時不容易孤立無援。",
-    risk: "若長期缺乏結構改善，容易消耗人際與心理能量。",
+    description: "你像在樹與樹之間靈活移動的猴子，經濟結構與金錢能力尚未完全穩定，但你並不孤單，也不僵住。你知道可以向外連結資源、尋求協助，心理上保有彈性與希望。當環境改變時，你懂得換一條路、找新的支點，而不是原地硬撐。你的韌性不只來自存款或收入，而是來自人際網絡與面對變動時的調整能力。",
+    advantage: "支持網絡與心理調節力強，遇到困難較不易孤立。對變動的適應力高，願意嘗試不同解方。",
+    risk: "若長期未補強財務結構與管理能力，可能形成「靠關係撐」而非「靠結構穩」的狀態。當支持資源同時受限時，抗風險力仍不足。",
     emoji: "🐒",
-    image: "/猴子.png", // 圖片路徑
+    image: "/猴子.png",
     color: "text-purple-600",
+  },
+  squirrel: {
+    name: "躲在葉子下的小松鼠",
+    subtitle: "保護網型受傷狀態",
+    description: "你像一隻躲在葉子下的小松鼠，平時已準備好保險、制度性資源或支持網絡，這些就像樹洞與樹葉，能為你遮風避雨。但最近可能遭遇突發支出、健康事件或情緒衝擊，讓內心或儲蓄暫時受傷。你不是毫無防護，而是正在恢復與修補中。只要給自己時間與適當協助，這層保護網會成為重新站穩的重要基礎。",
+    advantage: "制度性保障與支持系統完整，不易完全失去安全網。願意使用資源與求助，具備修復條件。",
+    risk: "若長期停留在防禦與療傷狀態，可能延後重建行動與結構調整。過度依賴保護網，忽略儲備與能力的再累積。",
+    emoji: "🐿️",
+    image: "/松鼠.png",
+    color: "text-yellow-600",
+  },
+  bear: {
+    name: "慢慢探出頭的小熊",
+    subtitle: "恢復中狀態",
+    description: "你像剛從洞穴中探出頭的小熊，曾經經歷過寒冷或困難的時期，現在內心已逐漸回暖，重新對生活產生信心。你身邊有可以支持你的人與資源，心理上也開始看見方向，只是部分財務結構仍在修復中，例如儲蓄尚未累積回來、債務還在整理、或金錢管理習慣仍在重建。這是一個「心已準備好，結構還在補」的階段，只要持續調整，穩定感會慢慢回來。",
+    advantage: "心理動能與支持系統穩定，具備實際重建的條件。願意面對問題並開始修復，復原力高。",
+    risk: "若修復行動停滯，可能長期停留在準備狀態，無法真正累積結構性穩定。過度樂觀而低估財務結構修補所需時間。",
+    emoji: "🐻",
+    image: "/熊.png",
+    color: "text-yellow-600",
   },
   dog: {
     name: "準備出發的小狗",
     subtitle: "心理啟動型",
-    description: "你已經意識到需要改變，也對未來抱有期待，只是目前在金錢管理與儲備上還缺乏具體的方法。像是想開始記帳、規劃支出，但不知道從哪一步下手。這代表動機已經出現，只要有人陪你整理方向、提供工具，就能慢慢走起來。",
-    advantage: "改變的動機與信心已啟動。",
-    risk: "若缺乏方法與支持，行動容易停留在想法階段。",
+    description: "你已經意識到需要改變，也開始對未來產生期待，心裡出現「想試試看、想重新來過」的動力。只是目前在儲蓄、預算或理財方法上還沒有清楚的工具與步驟。像一隻準備衝出去玩的小狗，內心充滿動能，但還需要項圈與方向。只要有人陪你整理現況、給你可行的小步驟，這股動機很容易轉化為實際行動。",
+    advantage: "改變動機與信心已啟動。對新方法、新學習的接受度高。",
+    risk: "若缺乏具體工具與支持，行動可能停留在想法與熱情階段。過快嘗試高風險決策，反而增加挫折感。",
     emoji: "🐕",
-    image: "/小狗.png", // 圖片路徑
+    image: "/小狗.png",
     color: "text-amber-600",
+  },
+  eagle: {
+    name: "盤旋高空的老鷹",
+    subtitle: "高能力、低安全網型",
+    description: "你像在高空盤旋的老鷹，看得遠、判斷清楚，具備良好的分析與規劃能力，也懂得如何管理金錢與風險。然而，地面上的安全網仍不夠厚實，儲備不足、保障不完整，或可動用的支持資源有限。你靠能力在飛行，一旦遇到強風或突發變化，沒有足夠的緩衝高度來調整。這是一種「能力很強，但安全邊際仍薄」的狀態。",
+    advantage: "理解力高、規劃能力佳，學習與調整速度快。面對問題時能理性分析並主動尋找解方。",
+    risk: "過度仰賴個人能力，忽略建立制度性保障與儲備。一次重大事件可能造成快速且劇烈的下滑。",
+    emoji: "🦅",
+    image: "/老鷹.png",
+    color: "text-blue-600",
   },
   turtle: {
     name: "穩定前行的烏龜",
     subtitle: "隱性韌性型",
-    description: "你的狀況沒有特別亮眼的優勢，也沒有明顯的危險訊號，各個面向都落在中間值。生活節奏可能不快，但不容易因單一事件而大幅失衡。這樣的狀態適合慢慢調整與準備，而不是急著做大改變，長遠風險可能出現壓力，需要定時盤點調整。",
-    advantage: "結構平衡，不易大幅波動。",
-    risk: "若缺乏主動準備，可能錯過提前強化的時機。",
+    description: "你像一隻穩定前行的烏龜，步伐不急，但殼厚而穩。收入、儲蓄、風險準備、金錢管理、支持網絡與心理狀態都維持在安全區間，即使遇到波動，也有足夠的緩衝與調節能力。你不需要急著衝刺，只要按照自己的節奏持續累積，就能長期保持穩定與韌性。這是一種「結構完整、抗風險力佳」的狀態。",
+    advantage: "結構穩定、抗風險能力高，具備長期調整與承受變動的彈性。心理穩定、資源與能力配置均衡。",
+    risk: "可能低估外部環境變化速度，若過於保守而缺乏成長與更新規劃，容易錯失強化資源與能力的機會。",
     emoji: "🐢",
-    image: "/烏龜.png", // 圖片路徑
+    image: "/烏龜.png",
     color: "text-green-600",
-  },
-  cat: {
-    name: "縮成一團休息的貓",
-    subtitle: "高風險疊加型",
-    description: "目前同時承受多項壓力，例如儲蓄不足、債務負擔、支持較少，以及對未來缺乏信心。這會讓人感到疲憊、退縮，甚至不想再多想下一步。這不是能力問題，而是負荷真的太重。此刻最重要的不是再撐，而是先被接住、慢慢恢復。",
-    advantage: "具備自我保護的本能，能暫停避免進一步消耗。",
-    risk: "若長期缺乏外部支持，恢復與重建會變得困難。",
-    emoji: "🐱",
-    image: "/貓.png", // 圖片路徑
-    color: "text-red-600",
-  },
-  bear: {
-    name: "慢慢探出頭的小熊",
-    subtitle: "恢復中的狀態",
-    description: "你正從一段壓力較高的財務狀態慢慢走出來，雖然整體還沒完全穩定，但已經開始面對問題、嘗試調整，改變的速度不快，卻是真實存在的。",
-    advantage: "已出現行動或心態轉變的跡象；不再完全逃避或否認財務問題；只要持續累積，小改變會慢慢變成穩定。",
-    risk: "進展慢，容易被自己或他人低估；若缺乏肯定或陪伴，可能中途退回原狀。",
-    emoji: "🐻",
-    image: "/熊.png", // 圖片路徑
-    color: "text-yellow-600",
-  },
-  ant: {
-    name: "努力拖著家的小螞蟻",
-    subtitle: "撐得很用力的狀態",
-    description: "你目前還能撐住家庭的日常運作，但多數責任與壓力集中在自己身上，每天都在用力維持，幾乎沒有真正喘息的空間。",
-    advantage: "責任感強，願意為家庭承擔；在資源有限下仍持續前進；是很多家庭度過困難時期的重要力量。",
-    risk: "長期消耗，容易突然撐不住；若沒有外部支持，壓力會快速累積。",
-    emoji: "🐜",
-    image: "/螞蟻.png", // 圖片路徑
-    color: "text-orange-600",
-  },
-  squirrel: {
-    name: "躲在葉子下的小松鼠",
-    subtitle: "有保護、但暫時受傷的狀態",
-    description: "你原本具備一定的能力、支持或準備，但近期因突發事件受到衝擊，選擇先縮起來保護自己，等待狀況好轉。",
-    advantage: "基礎條件仍在，並非從零開始；知道在受傷時先停下來休息；有機會在事件過後回到穩定狀態。",
-    risk: "若停留太久，可能錯過重新調整的時機；容易被誤判為長期高風險狀態。",
-    emoji: "🐿️",
-    image: "/松鼠.png", // 圖片路徑
-    color: "text-yellow-600",
   },
 }
 
@@ -529,40 +603,9 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
         )}
       </Card>
 
-      {/* 4. 結構判讀形容詞 */}
-      <Card className={`p-6 md:p-8 bg-card/80 backdrop-blur-sm border-2 ${structureTypeConfig[result.structureType].bgColor}`}>
-        <h3 className="text-xl font-semibold mb-6">結構判讀</h3>
-        <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-          {/* 插圖 - 佔一半 */}
-          <div className="w-full md:w-1/2 flex items-center justify-center rounded-lg bg-muted/50 p-4 min-h-[200px] md:min-h-[250px]">
-            {structureTypeConfig[result.structureType].image ? (
-              <img
-                src={structureTypeConfig[result.structureType].image!}
-                alt={structureTypeConfig[result.structureType].name}
-                className="w-full h-full max-w-[200px] max-h-[200px] object-contain"
-              />
-            ) : null}
-          </div>
-          {/* 文字內容 - 佔一半 */}
-          <div className="w-full md:w-1/2 space-y-3">
-            <p className={`text-xl font-bold ${structureTypeConfig[result.structureType].iconColor}`}>
-              {structureTypeConfig[result.structureType].name}
-            </p>
-            <p className="text-base leading-relaxed text-foreground whitespace-pre-line">
-              {structureTypeConfig[result.structureType].description}
-            </p>
-            <div className="mt-4 p-4 rounded-lg bg-muted/30 border-l-4 border-primary">
-              <p className="text-base font-medium text-foreground italic">
-                {structureTypeConfig[result.structureType].summary}
-              </p>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      {/* 5. 狀態理解動物 */}
+      {/* 4. 狀態理解動物 */}
       <Card className="p-6 md:p-8 bg-card/80 backdrop-blur-sm border-2">
-        <h3 className="text-xl font-semibold mb-6">狀態理解</h3>
+        <h3 className="text-xl font-semibold mb-6">在財務狀態上，你可能像</h3>
         <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
           {/* 動物圖示 - 佔一半 */}
           <div className="w-full md:w-1/2 flex items-center justify-center rounded-lg bg-muted/50 p-4 min-h-[200px] md:min-h-[250px] relative">
@@ -626,6 +669,65 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
             </p>
           </div>
         </div>
+      </Card>
+
+      {/* 5. 結構判讀形容詞 */}
+      <Card className={`p-6 md:p-8 bg-card/80 backdrop-blur-sm border-2 ${structureTypeConfig[result.structureType].bgColor}`}>
+        <h3 className="text-xl font-semibold mb-6">在財務結構上，你可能處於</h3>
+        <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+          {/* 插圖 - 佔一半 */}
+          <div className="w-full md:w-1/2 flex items-center justify-center rounded-lg bg-muted/50 p-4 min-h-[200px] md:min-h-[250px]">
+            {structureTypeConfig[result.structureType].image ? (
+              <img
+                src={structureTypeConfig[result.structureType].image!}
+                alt={structureTypeConfig[result.structureType].name}
+                className="w-full h-full max-w-[200px] max-h-[200px] object-contain"
+              />
+            ) : null}
+          </div>
+          {/* 文字內容 - 佔一半 */}
+          <div className="w-full md:w-1/2 space-y-3">
+            <div>
+              <p className={`text-xl font-bold ${structureTypeConfig[result.structureType].iconColor}`}>
+                {structureTypeConfig[result.structureType].name}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {structureTypeConfig[result.structureType].subtitle}
+              </p>
+            </div>
+            <p className="text-base leading-relaxed text-foreground whitespace-pre-line">
+              {structureTypeConfig[result.structureType].description}
+            </p>
+            <div className="mt-4 p-4 rounded-lg bg-muted/30 border-l-4 border-primary">
+              <p className="text-base font-medium text-foreground italic">
+                {structureTypeConfig[result.structureType].summary}
+              </p>
+            </div>
+          </div>
+        </div>
+        {/* 優勢與風險 - 放在圖片和敘述之下 */}
+        {structureTypeConfig[result.structureType].advantage && (
+          <div className="mt-6 space-y-3">
+            <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border-l-4 border-emerald-500">
+              <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 mb-2">
+                優勢
+              </p>
+              <p className="text-base text-foreground">
+                {structureTypeConfig[result.structureType].advantage}
+              </p>
+            </div>
+            {structureTypeConfig[result.structureType].risk && (
+              <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-950/20 border-l-4 border-orange-500">
+                <p className="text-sm font-semibold text-orange-700 dark:text-orange-400 mb-2">
+                  風險
+                </p>
+                <p className="text-base text-foreground">
+                  {structureTypeConfig[result.structureType].risk}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </Card>
 
       {/* 6. 目前可優先討論的方向（可複選） */}
