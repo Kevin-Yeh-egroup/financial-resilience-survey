@@ -20,7 +20,7 @@ export interface DimensionScores {
 }
 
 export type StructureType = "cycle" | "single" | "struggling" | "stuck" | "supported" | "stable" | "growing" | "mature"
-export type AnimalType = "cat" | "ant" | "elephant" | "ox" | "camel" | "otter" | "monkey" | "squirrel" | "bear" | "dog" | "eagle" | "turtle"
+export type AnimalType = "cat" | "ant" | "elephant" | "ox" | "camel" | "otter" | "monkey" | "squirrel" | "bear" | "dog" | "eagle" | "turtle" | "horse"
 
 export interface QuestionnaireResult {
   totalScore: number
