@@ -78,7 +78,7 @@ const structureTypeConfig = {
     summary: "有幾個支撐點，整體比較安心。",
     advantage: "生活運作大致穩定，收支與日常安排在可掌握範圍內。對未來有基本方向感，也具備一定的調整能力。",
     risk: "儲備與安全邊際不厚實，遇到連續的變動或突發事件時，容易從「還可以」很快變成「開始吃力」。",
-    image: "/有很多依靠的.png",
+    image: "/日常穩定.png",
     iconColor: "text-green-600",
     bgColor: "bg-green-50 dark:bg-green-950/20",
   },
