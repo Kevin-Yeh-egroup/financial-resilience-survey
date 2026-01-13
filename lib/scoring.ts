@@ -58,10 +58,10 @@ function determineStructureType(
   } = dimensions
 
   // 分數區間定義（燈號系統 v3.0）
-  // 🔴 0–34：高度脆弱（紅燈）
-  // 🟠 35–54：結構吃力（橘燈）
-  // 🟡 55–74：接近穩定（黃燈）
-  // 🟢 75–100：韌性良好（綠燈）
+  // 🔴 0–34：高度脆弱
+  // 🟠 35–54：結構吃力
+  // 🟡 55–74：接近穩定
+  // 🟢 75–100：穩定良好
 
   // 輔助函數：判斷分數區間
   const isRed = (score: number) => score >= 0 && score <= 34
@@ -122,11 +122,28 @@ function determineStructureType(
   }
 
   // 5. 人脈承接（supported）
-  // 燈號條件：資源連結🟢、心理與規劃🟢、其餘四項中可有一至二項為🟠或🔴
-  const otherDimensions = [收入穩定度, 儲備應變力, 債務與保障, 金錢管理]
-  const otherLowCount = otherDimensions.filter((d) => isOrangeOrRed(d)).length
-  if (isGreen(資源連結) && isGreen(心理與規劃) && otherLowCount <= 2) {
-    return "supported"
+  // 必要條件：資源連結🟢、心理與規劃🟢
+  // 結構限制條件：
+  // - 以下四項中，至少兩項為🟠，且最多僅一項可為🟢：收入穩定度、儲備應變力、債務與保障、金錢管理
+  // - 儲備應變力不得為🟢（必須 ≤ 🟡）
+  // 排除條件：若以下三項中任兩項為🟢，則不得判為人脈承接型：儲備應變力、金錢管理、債務與保障
+  if (isGreen(資源連結) && isGreen(心理與規劃)) {
+    // 儲備應變力不得為🟢（必須 ≤ 🟡）
+    if (!isGreen(儲備應變力)) {
+      const otherDimensions = [收入穩定度, 儲備應變力, 債務與保障, 金錢管理]
+      const orangeCount = otherDimensions.filter((d) => isOrange(d)).length
+      const greenCount = otherDimensions.filter((d) => isGreen(d)).length
+      
+      // 至少兩項為🟠，且最多僅一項可為🟢
+      if (orangeCount >= 2 && greenCount <= 1) {
+        // 排除條件：若以下三項中任兩項為🟢，則不得判為人脈承接型
+        const criticalDimensions = [儲備應變力, 金錢管理, 債務與保障]
+        const criticalGreenCount = criticalDimensions.filter((d) => isGreen(d)).length
+        if (criticalGreenCount < 2) {
+          return "supported"
+        }
+      }
+    }
   }
 
   // 6. 日常穩定（stable）
@@ -268,13 +285,13 @@ function determineAnimalType(
   // - 無 🔴，但亦未達烏龜標準
   const hasRed = allDimensions.some((d) => isRed(d))
   const yellowCount = allDimensions.filter((d) => isYellow(d)).length
-  const orangeCount = allDimensions.filter((d) => isOrange(d)).length
-  const greenCount = allDimensions.filter((d) => isGreen(d)).length
+  const orangeCountForCamel = allDimensions.filter((d) => isOrange(d)).length
+  const greenCountForCamel = allDimensions.filter((d) => isGreen(d)).length
   if (
     !hasRed &&
-    greenCount === 0 &&
+    greenCountForCamel === 0 &&
     yellowCount <= 1 &&
-    orangeCount + yellowCount === 6
+    orangeCountForCamel + yellowCount === 6
   ) {
     return "camel"
   }
