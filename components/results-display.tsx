@@ -394,7 +394,7 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
         </div>
         <ChartContainer config={chartConfig} className="h-[450px] w-full">
           <RadarChart data={radarData} outerRadius="60%">
-            <PolarGrid />
+            <PolarGrid gridType="polygon" />
             <PolarAngleAxis
               dataKey="dimension"
               tick={(props) => {
@@ -548,6 +548,7 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
             <PolarRadiusAxis
               angle={90}
               domain={[0, 30]}
+              ticks={[0, 10, 20, 30]}
               tick={false}
               axisLine={false}
             />
