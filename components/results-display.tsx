@@ -89,7 +89,7 @@ const structureTypeConfig = {
     summary: "不只是撐著，而是正在長出來。",
     advantage: "已開始有計畫地整理財務、思考未來方向。內在動機與學習意願穩定，支持與工具也逐步到位。",
     risk: "若缺乏持續行動與制度化習慣，成長可能停留在嘗試階段。中途鬆手，容易退回原本只是撐著或日常穩定的狀態。",
-    image: "/結構正在長出來的.png",
+    image: "/成長建構.png",
     iconColor: "text-blue-600",
     bgColor: "bg-blue-50 dark:bg-blue-950/20",
   },
@@ -290,49 +290,71 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
     setStatistics(stats)
   }, [])
 
+  // 將 0-30 分制轉換為 0-100 分制（用於雷達圖顯示）
+  const convertTo100Scale = (score30: number): number => {
+    return (score30 / 30) * 100
+  }
+
+  // 根據 0-30 分制判斷燈號
+  const getIndicatorLight = (score30: number): string => {
+    if (score30 >= 0 && score30 <= 7) return "🔴"
+    if (score30 >= 8 && score30 <= 15) return "🟠"
+    if (score30 >= 16 && score30 <= 23) return "🟡"
+    if (score30 >= 24 && score30 <= 30) return "🟢"
+    return ""
+  }
+
   // 準備雷達圖資料（包含使用者和平均值）
+  // userValue 和 averageValue 轉換為 0-100 分制用於雷達圖顯示
+  // userScore 和 averageScore 保持 0-30 分制用於顯示
   const radarData = [
     {
       dimension: "收入穩定度",
-      userValue: result.dimensionScores.收入穩定度,
-      averageValue: averageScores?.收入穩定度 ?? 0,
+      userValue: convertTo100Scale(result.dimensionScores.收入穩定度),
+      averageValue: averageScores ? convertTo100Scale(averageScores.收入穩定度) : 0,
       userScore: Math.round(result.dimensionScores.收入穩定度),
       averageScore: averageScores ? Math.round(averageScores.收入穩定度) : 0,
+      userLight: getIndicatorLight(result.dimensionScores.收入穩定度),
     },
     {
       dimension: "儲備應變力",
-      userValue: result.dimensionScores.儲備應變力,
-      averageValue: averageScores?.儲備應變力 ?? 0,
+      userValue: convertTo100Scale(result.dimensionScores.儲備應變力),
+      averageValue: averageScores ? convertTo100Scale(averageScores.儲備應變力) : 0,
       userScore: Math.round(result.dimensionScores.儲備應變力),
       averageScore: averageScores ? Math.round(averageScores.儲備應變力) : 0,
+      userLight: getIndicatorLight(result.dimensionScores.儲備應變力),
     },
     {
       dimension: "債務與保障",
-      userValue: result.dimensionScores.債務與保障,
-      averageValue: averageScores?.債務與保障 ?? 0,
+      userValue: convertTo100Scale(result.dimensionScores.債務與保障),
+      averageValue: averageScores ? convertTo100Scale(averageScores.債務與保障) : 0,
       userScore: Math.round(result.dimensionScores.債務與保障),
       averageScore: averageScores ? Math.round(averageScores.債務與保障) : 0,
+      userLight: getIndicatorLight(result.dimensionScores.債務與保障),
     },
     {
       dimension: "金錢管理",
-      userValue: result.dimensionScores.金錢管理,
-      averageValue: averageScores?.金錢管理 ?? 0,
+      userValue: convertTo100Scale(result.dimensionScores.金錢管理),
+      averageValue: averageScores ? convertTo100Scale(averageScores.金錢管理) : 0,
       userScore: Math.round(result.dimensionScores.金錢管理),
       averageScore: averageScores ? Math.round(averageScores.金錢管理) : 0,
+      userLight: getIndicatorLight(result.dimensionScores.金錢管理),
     },
     {
       dimension: "資源連結",
-      userValue: result.dimensionScores.資源連結,
-      averageValue: averageScores?.資源連結 ?? 0,
+      userValue: convertTo100Scale(result.dimensionScores.資源連結),
+      averageValue: averageScores ? convertTo100Scale(averageScores.資源連結) : 0,
       userScore: Math.round(result.dimensionScores.資源連結),
       averageScore: averageScores ? Math.round(averageScores.資源連結) : 0,
+      userLight: getIndicatorLight(result.dimensionScores.資源連結),
     },
     {
       dimension: "心理與規劃",
-      userValue: result.dimensionScores.心理與規劃,
-      averageValue: averageScores?.心理與規劃 ?? 0,
+      userValue: convertTo100Scale(result.dimensionScores.心理與規劃),
+      averageValue: averageScores ? convertTo100Scale(averageScores.心理與規劃) : 0,
       userScore: Math.round(result.dimensionScores.心理與規劃),
       averageScore: averageScores ? Math.round(averageScores.心理與規劃) : 0,
+      userLight: getIndicatorLight(result.dimensionScores.心理與規劃),
     },
   ]
 
@@ -369,11 +391,6 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
       <Card className="p-6 md:p-8 bg-card/80 backdrop-blur-sm border-2">
         <div className="mb-6">
           <h3 className="text-xl font-semibold mb-2 text-center">六構面雷達圖</h3>
-          {averageScores && statistics.totalCount > 0 && (
-            <p className="text-sm text-muted-foreground text-center">
-              與 {statistics.totalCount} 位使用者的平均分數比較
-            </p>
-          )}
         </div>
         <ChartContainer config={chartConfig} className="h-[450px] w-full">
           <RadarChart data={radarData} outerRadius="60%">
@@ -403,14 +420,16 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
                   }
                   const dimensionKey = dimensionMap[payload.value]
                   if (dimensionKey) {
-                    const userScore = Math.round(result.dimensionScores[dimensionKey])
+                    const userScore30 = result.dimensionScores[dimensionKey]
+                    const userScore = Math.round(userScore30)
                     const avgScore = averageScores ? Math.round(averageScores[dimensionKey]) : 0
                     data = {
                       dimension: payload.value,
-                      userValue: result.dimensionScores[dimensionKey],
-                      averageValue: averageScores?.[dimensionKey] ?? 0,
+                      userValue: convertTo100Scale(userScore30),
+                      averageValue: averageScores ? convertTo100Scale(averageScores[dimensionKey]) : 0,
                       userScore,
                       averageScore: avgScore,
+                      userLight: getIndicatorLight(userScore30),
                     }
                   }
                 }
@@ -513,25 +532,13 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
                           x={labelX}
                           y={labelY + verticalSpacing}
                           fill="#f97316"
-                          fontSize={13}
+                          fontSize={16}
                           fontWeight="bold"
                           textAnchor="middle"
                           dominantBaseline="middle"
                         >
-                          {data.userScore}
+                          {data.userLight}
                         </text>
-                        {averageScores && (
-                          <text
-                            x={labelX}
-                            y={labelY + verticalSpacing * 2}
-                            fill="#6b7280"
-                            fontSize={11}
-                            textAnchor="middle"
-                            dominantBaseline="middle"
-                          >
-                            平均 {data.averageScore}
-                          </text>
-                        )}
                       </>
                     ) : null}
                   </g>
@@ -578,12 +585,12 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
                     <div className="space-y-1 text-sm">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#f97316" }}></div>
-                        <span>您的分數: {payload[0].value?.toFixed(1)}</span>
+                        <span>您的分數: {payload[0].value?.toFixed(1)} 分</span>
                       </div>
                       {averageScores && payload[1] && (
                         <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#6b7280" }}></div>
-                          <span>平均分數: {payload[1].value?.toFixed(1)}</span>
+                          <span>平均分數: {payload[1].value?.toFixed(1)} 分</span>
                         </div>
                       )}
                     </div>

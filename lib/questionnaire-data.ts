@@ -68,7 +68,7 @@ export const questions: Question[] = [
       { label: "A. 熟悉轉帳、繳費、帳戶管理", value: "A", score: 10 },
       { label: "B. 會基本操作或有固定協助方式", value: "B", score: 7 },
       { label: "C. 不太會用，常覺得困難", value: "C", score: 3 },
-      { label: "D. 幾乎沒有使用", value: "D", score: 0 },
+      { label: "D. 目前是警示帳戶或帳戶凍結", value: "D", score: 0 },
     ],
   },
   {
