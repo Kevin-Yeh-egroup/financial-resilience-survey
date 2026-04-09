@@ -8,6 +8,8 @@ import { RefreshCw } from "lucide-react"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from "recharts"
 import { calculateAverageScores, getStatistics } from "@/lib/storage"
+import { PostActionRecommendations } from "@/components/post-action-recommendations"
+import { getNextStepRecommendations } from "@/lib/next-step-recommendations"
 
 interface ResultsDisplayProps {
   result: QuestionnaireResult
@@ -771,30 +773,11 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
         </Card>
       )}
 
-      {/* 7. 下一步行動按鈕 */}
-      <Card className="p-6 md:p-8 bg-card/80 backdrop-blur-sm border-2">
-        <h3 className="text-xl font-semibold mb-4">下一步行動</h3>
-        <div className="grid sm:grid-cols-3 gap-3">
-          <Button variant="outline" className="w-full bg-transparent relative" disabled>
-            <span className="mr-2">個人財務諮詢</span>
-            <span className="absolute -top-2 -right-2 px-2 py-0.5 text-xs bg-primary text-primary-foreground rounded-full">
-              開發中
-            </span>
-          </Button>
-          <Button variant="outline" className="w-full bg-transparent relative" disabled>
-            <span className="mr-2">問問 AI</span>
-            <span className="absolute -top-2 -right-2 px-2 py-0.5 text-xs bg-primary text-primary-foreground rounded-full">
-              開發中
-            </span>
-          </Button>
-          <Button variant="outline" className="w-full bg-transparent relative" disabled>
-            <span className="mr-2">紀錄本次測試結果</span>
-            <span className="absolute -top-2 -right-2 px-2 py-0.5 text-xs bg-primary text-primary-foreground rounded-full">
-              開發中
-            </span>
-          </Button>
-        </div>
-      </Card>
+      {/* 7. 建議下一步（完成測驗後引導） */}
+      <PostActionRecommendations
+        statusSummary={`你已經完成初測了。整體落在「${scoreConfig.label}」；財務結構上，目前較接近「${structureTypeConfig[result.structureType].name}」。`}
+        actions={getNextStepRecommendations(result)}
+      />
 
       {/* 重新評估按鈕 */}
       <div className="text-center">
