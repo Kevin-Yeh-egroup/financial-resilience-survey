@@ -783,25 +783,34 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
             )}
           </div>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            你現在完成的是體感入口，約 30% 評估。登入後可把「感覺」轉為「可追蹤、可行動」的客觀資料，
-            包含承重能力、生存月數、落差指數與每月成長曲線。
+            你剛做完的是「體感版」快篩，像先量個體溫。接下來到個人中心，會看到同一套脈絡整理好的畫面：上面有總覽（這次體感幾分、跟上一次差多少），
+            下面用分頁排好真實財務韌性、詐騙防禦能力、財務焦慮、夢想達成財務管理（總覽裡還有財務生活記帳助理等工具列表）。每一項點開都有白話說明和「對你有什麼幫助」，
+            再按鈕連到官方工具頁去用。
           </p>
           <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-lg border bg-background/70 p-4">
-              <p className="text-sm font-semibold">客觀版可解鎖</p>
-              <p className="mt-2 text-sm text-muted-foreground">承重能力、生存月數、收支壓力、風險燈號（紅黃綠）</p>
+              <p className="text-sm font-semibold">總覽：先看分數，心裡有底</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                跟個人中心總覽一樣，會帶出你最近一次體感總分，以及「跟上次比多了還是少了」，不用自己記。
+              </p>
             </div>
             <div className="rounded-lg border bg-background/70 p-4">
-              <p className="text-sm font-semibold">體感 vs 客觀對照</p>
-              <p className="mt-2 text-sm text-muted-foreground">看見認知落差（Gap Score），避免「以為撐得住」的誤判</p>
+              <p className="text-sm font-semibold">真實財務韌性：數字版再算細一點</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                對應個人中心裡的「真實財務韌性」分頁，連到另一套評估，看總分、各面向，還能對照前幾次有沒有變化。
+              </p>
             </div>
             <div className="rounded-lg border bg-background/70 p-4">
-              <p className="text-sm font-semibold">持續累積與提醒</p>
-              <p className="mt-2 text-sm text-muted-foreground">串接記帳後自動更新，提供情境式 AI 提醒與月報</p>
+              <p className="text-sm font-semibold">記帳、防詐、焦慮、夢想：同一頁找得到</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                跟個人中心一樣，財務生活記帳助理、詐騙防禦能力、財務焦慮、夢想達成財務管理都列得出來；點標題會展開說明和好處，再一鍵開新分頁使用。
+              </p>
             </div>
             <div className="rounded-lg border bg-background/70 p-4">
-              <p className="text-sm font-semibold">自動行動建議</p>
-              <p className="mt-2 text-sm text-muted-foreground">依結果生成本週與本月任務，讓評估真正變成進步</p>
+              <p className="text-sm font-semibold">不用一次做完</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                今天先看總覽、改天再記帳或做真實評估都可以。重點是知道「下一步要去哪個工具」，比較不會做完測驗就停在原地。
+              </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -811,7 +820,9 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
-            <p className="text-sm text-muted-foreground">建立會員後，才能持續追蹤你的財務韌性成長曲線。</p>
+            <p className="text-sm text-muted-foreground">
+              進去後可先逛總覽與工具說明；若各站需要登入或註冊，再依畫面指示即可。
+            </p>
           </div>
         </div>
       </Card>
