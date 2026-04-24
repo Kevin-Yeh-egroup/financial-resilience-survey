@@ -1,0 +1,201 @@
+# 問卷系統自定義指南
+
+這個指南將幫助您將財務韌性問卷系統複製並自定義為您自己的問卷系統。
+
+## 📁 專案結構
+
+```
+├── app/                    # Next.js 應用程式
+│   ├── page.tsx           # 主頁面（問卷流程控制）
+│   └── layout.tsx         # 佈局
+├── components/            # React 組件
+│   ├── questionnaire-form.tsx    # 問卷表單
+│   ├── results-display.tsx       # 結果顯示
+│   └── transition-animation.tsx  # 轉換動畫
+├── lib/                   # 核心邏輯
+│   ├── questionnaire-config.ts   # ⭐ 配置檔案（主要修改這裡）
+│   ├── questionnaire-data.ts     # 問卷題目數據
+│   └── scoring.ts                # 分數計算邏輯
+└── types/                # TypeScript 類型定義
+    └── questionnaire.ts
+```
+
+## 🎯 快速開始
+
+### 步驟 1: 複製專案
+
+1. 複製整個專案資料夾
+2. 重新命名為您的專案名稱
+3. 安裝依賴：`npm install` 或 `pnpm install`
+
+### 步驟 2: 修改配置檔案
+
+主要修改 `lib/questionnaire-config.ts` 檔案：
+
+#### 2.1 基本設定
+
+```typescript
+export const questionnaireConfig = {
+  title: "您的問卷標題",
+  subtitle: "您的問卷副標題",
+  // ... 其他設定
+}
+```
+
+#### 2.2 修改問卷題目
+
+編輯 `lib/questionnaire-data.ts`：
+
+```typescript
+export const questions: Question[] = [
+  {
+    id: 1,
+    text: "您的問題文字",
+    options: [
+      { label: "選項 A", value: "A", score: 10 },
+      { label: "選項 B", value: "B", score: 7 },
+      // ...
+    ],
+  },
+  // 更多題目...
+]
+```
+
+#### 2.3 調整構面設定
+
+如果您的問卷有不同的構面：
+
+```typescript
+dimensions: [
+  "構面一",
+  "構面二",
+  // ...
+],
+
+dimensionMapping: {
+  構面一: [1, 2],  // 對應的題目 ID
+  構面二: [3, 4],
+  // ...
+}
+```
+
+#### 2.4 自定義分數區間
+
+```typescript
+scoreRanges: {
+  excellent: { min: 75, max: 100, label: "優秀", color: "emerald" },
+  good: { min: 60, max: 74, label: "良好", color: "yellow" },
+  // ...
+}
+```
+
+#### 2.5 修改回饋文字
+
+```typescript
+scoreFeedback: {
+  excellent: "您的回饋文字...",
+  good: "您的回饋文字...",
+  // ...
+}
+```
+
+#### 2.6 調整優先方向
+
+```typescript
+priorityOptions: [
+  "優先方向一",
+  "優先方向二",
+  // ...
+],
+
+priorityRules: [
+  { questionIds: [1, 2], priority: "優先方向一", threshold: 3 },
+  // ...
+]
+```
+
+### 步驟 3: 修改結構型判讀
+
+編輯 `lib/questionnaire-config.ts` 中的 `structureTypeConfig`：
+
+```typescript
+export const structureTypeConfig = {
+  A: {
+    name: "結構名稱 A",
+    description: "結構描述...",
+  },
+  // ...
+}
+```
+
+### 步驟 4: 調整分數計算邏輯（可選）
+
+如果需要修改計算邏輯，編輯 `lib/scoring.ts`：
+
+- `calculateResult()`: 總分和構面分數計算
+- `determineStructureType()`: 結構型判斷邏輯
+- `determinePriorities()`: 優先方向判斷邏輯
+
+### 步驟 5: 自定義樣式和主題
+
+1. 修改 `app/globals.css` 調整顏色主題
+2. 修改組件中的 Tailwind CSS 類別來調整樣式
+
+## 🔧 進階自定義
+
+### 修改組件樣式
+
+- `components/questionnaire-form.tsx`: 問卷表單樣式
+- `components/results-display.tsx`: 結果頁面樣式
+- `components/transition-animation.tsx`: 轉換動畫樣式
+
+### 添加新功能
+
+1. **添加新的結果類型**：修改 `types/questionnaire.ts`
+2. **添加新的視覺化**：在 `results-display.tsx` 中添加新組件
+3. **添加數據導出**：在結果頁面添加導出功能
+
+## 📝 配置檢查清單
+
+- [ ] 修改問卷標題和副標題
+- [ ] 更新所有問卷題目
+- [ ] 調整構面名稱和對應關係
+- [ ] 自定義分數區間和回饋文字
+- [ ] 更新優先方向列表和判斷規則
+- [ ] 修改結構型判讀文字
+- [ ] 調整顏色主題和樣式
+- [ ] 測試所有功能是否正常運作
+
+## 🚀 部署
+
+1. 構建專案：`npm run build`
+2. 啟動生產環境：`npm start`
+3. 或部署到 Vercel/Netlify 等平台
+
+## 💡 提示
+
+- 保持 `types/questionnaire.ts` 中的類型定義與配置一致
+- 確保題目 ID 在 `dimensionMapping` 和 `priorityRules` 中正確對應
+- 測試不同分數區間的回饋文字顯示
+- 確保所有文字內容符合您的需求
+
+## ❓ 常見問題
+
+### Q: 如何添加更多題目？
+A: 在 `questionnaire-data.ts` 中添加新題目，並更新 `dimensionMapping` 和 `priorityRules`。
+
+### Q: 如何修改雷達圖的構面數量？
+A: 修改 `questionnaire-config.ts` 中的 `dimensions` 陣列，並更新 `dimensionMapping`。
+
+### Q: 如何改變分數計算方式？
+A: 修改 `lib/scoring.ts` 中的計算邏輯。
+
+## 📞 支援
+
+如有問題，請參考：
+- Next.js 文檔：https://nextjs.org/docs
+- React 文檔：https://react.dev
+- Tailwind CSS 文檔：https://tailwindcss.com/docs
+
+
+

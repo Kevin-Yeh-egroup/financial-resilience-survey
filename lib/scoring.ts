@@ -1,0 +1,765 @@
+import type { QuestionnaireResult, DimensionScores, StructureType, AnimalType } from "@/types/questionnaire"
+
+export function calculateResult(answers: Record<number, number>): QuestionnaireResult {
+  // 計算總分（0-100）
+  const totalScore = Object.values(answers).reduce((sum, score) => sum + score, 0)
+
+  // 計算六構面分數（0-30）：直接加總，不除以2也不乘以10
+  // 根據六大指標 × 題目對應表（最終版）
+  const dimensionScores: DimensionScores = {
+    // ① 收入穩定度：第 1、2、9 題
+    收入穩定度: (answers[1] || 0) + (answers[2] || 0) + (answers[9] || 0),
+    // ② 儲備應變力：第 1、3、5 題
+    儲備應變力: (answers[1] || 0) + (answers[3] || 0) + (answers[5] || 0),
+    // ③ 債務與保障：第 4、6、10 題
+    債務與保障: (answers[4] || 0) + (answers[6] || 0) + (answers[10] || 0),
+    // ④ 金錢管理：第 3、7、8 題
+    金錢管理: (answers[3] || 0) + (answers[7] || 0) + (answers[8] || 0),
+    // ⑤ 資源連結：第 5、7、9 題
+    資源連結: (answers[5] || 0) + (answers[7] || 0) + (answers[9] || 0),
+    // ⑥ 心理與規劃：第 3、8、10 題
+    心理與規劃: (answers[3] || 0) + (answers[8] || 0) + (answers[10] || 0),
+  }
+
+  // 判斷結構型（優先覆蓋制，由最脆弱到最成熟）
+  const structureType = determineStructureType(dimensionScores, answers)
+
+  // 判斷狀態理解動物（8 類）
+  const animalType = determineAnimalType(dimensionScores, answers)
+
+  // 判斷等級（用於顏色顯示）
+  let level: QuestionnaireResult["level"]
+  if (totalScore >= 75) {
+    level = "resilient"
+  } else if (totalScore >= 60) {
+    level = "approaching"
+  } else if (totalScore >= 40) {
+    level = "fragile"
+  } else {
+    level = "highly-fragile"
+  }
+
+  const priorities = determinePriorities(answers)
+
+  return {
+    totalScore,
+    level,
+    priorities,
+    dimensionScores,
+    structureType,
+    animalType,
+  }
+}
+
+function determineStructureType(
+  dimensions: DimensionScores,
+  answers: Record<number, number>
+): StructureType {
+  // ============================================
+  // 【雙層結構承接判讀法（DSRM）— 系統判讀總原則】
+  // ============================================
+  // 第一層：嚴格結構判讀（Strict Classification）
+  // - 每一個結構型態皆有明確「必要條件」與「否決條件」
+  // - 僅在完全符合條件時，才可判定為該結構
+  // - 若無任何結構命中，允許暫時進入系統內部狀態 UNCLASSIFIED（僅限內部）
+  //
+  // 第二層：承接層判讀（Fallback Resolution）
+  // - 若第一層無命中，系統不得對使用者顯示「無法定義」
+  // - 必須透過承接邏輯，將結果映射為「最接近的結構型態」
+  // - 承接層不得修改原始分數或燈號，只能依既有結構進行比對
+  //
+  // 對使用者端：
+  // - 系統永遠只輸出一個可理解的結構型態
+  // - 不顯示 UNCLASSIFIED、不顯示錯誤或例外
+  // ============================================
+
+  const {
+    收入穩定度,
+    儲備應變力,
+    債務與保障,
+    金錢管理,
+    資源連結,
+    心理與規劃,
+  } = dimensions
+
+  // 分數區間定義（燈號系統）
+  // 🔴 0–7：結構斷裂或高度不足
+  // 🟠 8–15：明顯吃力，安全邊際薄
+  // 🟡 16–23：可運作但彈性有限
+  // 🟢 24–30：結構良好，可承接變動
+
+  // 輔助函數：判斷分數區間
+  const isRed = (score: number) => score >= 0 && score <= 7
+  const isOrange = (score: number) => score >= 8 && score <= 15
+  const isYellow = (score: number) => score >= 16 && score <= 23
+  const isGreen = (score: number) => score >= 24 && score <= 30
+  const isOrangeOrRed = (score: number) => score >= 0 && score <= 15
+  const isYellowOrGreen = (score: number) => score >= 16 && score <= 30
+
+  const allDimensions = [收入穩定度, 儲備應變力, 債務與保障, 金錢管理, 資源連結, 心理與規劃]
+  const redCount = allDimensions.filter((d) => isRed(d)).length
+  const orangeCount = allDimensions.filter((d) => isOrange(d)).length
+  const supportDimensions = [儲備應變力, 資源連結, 心理與規劃]
+
+  // ============================================
+  // 【結構判讀順序（不可更動）】
+  // 系統判讀時，必須依下列順序檢查結構，符合即停止：
+  // 1. 循環消耗型（Strict only）
+  // 2. 單一支撐型（Strict only）
+  // 3. 吃力支撐型（Strict + 承接）
+  // 4. 資源卡住型（Strict + 承接）
+  // 5. 人脈承接型（Strict + 承接）
+  // 6. 日常穩定型（Strict）
+  // 7. 成長建構型（Strict + 承接）
+  // 8. 成熟穩健型（Strict only）
+  // ============================================
+
+  // 第一層：嚴格結構判讀（Strict Classification）
+
+  // 1. 循環消耗（cycle）
+  // 燈號條件（必要判定）：
+  // - 儲備應變力：🔴
+  // - 債務與保障：🔴
+  // - 以下三項中，至少一項為 🟠 或 🔴：金錢管理、心理與規劃、資源連結
+  // 排除條件：
+  // - 若儲備應變力 ≠ 🔴 或 債務與保障 ≠ 🔴，不得判為循環消耗型
+  // - 若資源連結 = 🟢，不得判為循環消耗型（有外部支持系統，壓力不再完全由家庭內部承擔）
+  if (
+    !isGreen(資源連結) && // 排除：資源連結 = 🟢
+    isRed(儲備應變力) &&
+    isRed(債務與保障) &&
+    (isOrangeOrRed(金錢管理) || isOrangeOrRed(心理與規劃) || isOrangeOrRed(資源連結))
+  ) {
+    return "cycle"
+  }
+
+  // 2. 單一支撐（single）
+  // 燈號條件（必要判定）：
+  // - 收入穩定度：🟢
+  // - 以下三項中，至少兩項為 🟠 或 🔴：儲備應變力、資源連結、心理與規劃
+  // 新增結構限制條件：心理與規劃 ≠ 🔴（若心理已紅燈，代表動能斷裂，不得視為可撐型態）
+  // 排除條件：
+  // - 若儲備應變力 ≥ 🟡 且 資源連結 ≥ 🟡，不得判為單一支撐型
+  // - 若資源連結 = 🟢，不得判為單一支撐型（有外部支持系統，壓力不再完全由家庭內部承擔）
+  if (isGreen(收入穩定度) && !isGreen(資源連結)) { // 排除：資源連結 = 🟢
+    const supportLowCount = [儲備應變力, 資源連結, 心理與規劃].filter((d) => isOrangeOrRed(d)).length
+    if (
+      supportLowCount >= 2 &&
+      !isRed(心理與規劃) && // 新增：心理與規劃 ≠ 🔴
+      !(isYellowOrGreen(儲備應變力) && isYellowOrGreen(資源連結)) // 排除：若儲備應變力 ≥ 🟡 且 資源連結 ≥ 🟡
+    ) {
+      return "single"
+    }
+  }
+
+  // 3. 吃力支撐（struggling）
+  // 燈號條件（必要判定）：
+  // - 儲備應變力：🟠
+  // - 金錢管理：🟠
+  // - 心理與規劃：🟠（限定）
+  // - 六大指標中 🔴 不得超過一項
+  // 排除條件：
+  // - 若 🔴 ≥ 2 項，應回判為「循環消耗型」（已在循環消耗之後檢查）
+  // - 若資源連結 = 🟢，不得判為吃力支撐型（有外部支持系統，壓力不再完全由家庭內部承擔）
+  if (
+    !isGreen(資源連結) && // 排除：資源連結 = 🟢
+    isOrange(儲備應變力) &&
+    isOrange(金錢管理) &&
+    isOrange(心理與規劃) && // 改為限定：心理與規劃：🟠（不再包含🟡）
+    redCount <= 1
+  ) {
+    return "struggling"
+  }
+
+  // 4. 資源卡住（stuck）
+  // 燈號條件：
+  // - 收入穩定度：🟡～🟢
+  // - 以下至少兩項為 🟠 或 🔴：儲備應變力、金錢管理、心理與規劃
+  // - 資源連結：🟡 或 🟢（資源存在，但未形成實質承接）
+  // 新增否決條件：若儲備應變力＝🔴 且 心理與規劃＝🔴 → 不得判為資源卡住型（代表已無動能，應上判循環消耗）
+  // 排除條件：若資源連結：🟢 且 心理與規劃：🟢，應往上檢查「人脈承接型」（已在人脈承接之後檢查）
+  if (
+    (isYellow(收入穩定度) || isGreen(收入穩定度)) &&
+    (isYellow(資源連結) || isGreen(資源連結))
+  ) {
+    const weakDimensions = [儲備應變力, 金錢管理, 心理與規劃]
+    const weakCount = weakDimensions.filter((d) => isOrangeOrRed(d)).length
+    if (
+      weakCount >= 2 &&
+      !(isRed(儲備應變力) && isRed(心理與規劃)) && // 新增否決：若儲備應變力＝🔴 且 心理與規劃＝🔴 → 不得判為資源卡住型
+      !(isGreen(資源連結) && isGreen(心理與規劃))  // 避免與人脈承接重疊
+    ) {
+      return "stuck"
+    }
+  }
+
+  // 5. 人脈承接（supported）
+  // 燈號條件：
+  // - 資源連結：🟢
+  // - 心理與規劃：🟢
+  // 結構限制條件：
+  // - 以下四項中，至少兩項為 🟠，且最多僅一項為 🟢：收入穩定度、儲備應變力、債務與保障、金錢管理
+  // - 儲備應變力 ≤ 🟡（尚未內建安全邊際）
+  // - 債務與保障 ≠ 🔴（新增）
+  // 排除條件：若以下三項中任兩項為 🟢：儲備應變力、金錢管理、債務與保障，不得判為人脈承接型
+  if (isGreen(資源連結) && isGreen(心理與規劃)) {
+    // 儲備應變力 ≤ 🟡（尚未內建安全邊際）
+    if (!isGreen(儲備應變力) && !isRed(債務與保障)) { // 新增：債務與保障 ≠ 🔴
+      const otherDimensions = [收入穩定度, 儲備應變力, 債務與保障, 金錢管理]
+      const orangeCount = otherDimensions.filter((d) => isOrange(d)).length
+      const greenCount = otherDimensions.filter((d) => isGreen(d)).length
+      
+      // 至少兩項為 🟠，且最多僅一項為 🟢
+      if (orangeCount >= 2 && greenCount <= 1) {
+        // 排除條件：若以下三項中任兩項為 🟢，則不得判為人脈承接型
+        const criticalDimensions = [儲備應變力, 金錢管理, 債務與保障]
+        const criticalGreenCount = criticalDimensions.filter((d) => isGreen(d)).length
+        if (criticalGreenCount < 2) {
+          return "supported"
+        }
+      }
+    }
+  }
+
+  // 6. 日常穩定（stable）
+  // 燈號條件（必要）：
+  // - 收入穩定度：🟡～🟢
+  // - 金錢管理：🟡
+  // - 心理與規劃：🟡
+  // - 儲備應變力：🟠～🟡
+  // - 資源連結：🟠～🟡
+  // - 六大指標中 🔴 不得超過一項
+  // - 且心理、金錢管理、儲備不得為 🔴（新增否決）
+  // 排除條件：
+  // - 若 🔴 ≥ 2 項，應回判為「吃力支撐型」（已在吃力支撐之後檢查）
+  // - 若心理與規劃：🟢 且 金錢管理：🟢，應往上檢查「成長建構型」（已在成長建構之後檢查）
+  if (
+    (isYellow(收入穩定度) || isGreen(收入穩定度)) &&
+    isYellow(金錢管理) &&
+    isYellow(心理與規劃) &&
+    (isOrange(儲備應變力) || isYellow(儲備應變力)) &&
+    (isOrange(資源連結) || isYellow(資源連結)) &&
+    redCount <= 1 &&
+    !isRed(心理與規劃) && // 新增否決：心理不得為 🔴
+    !isRed(金錢管理) && // 新增否決：金錢管理不得為 🔴
+    !isRed(儲備應變力) && // 新增否決：儲備不得為 🔴
+    !(isGreen(心理與規劃) && isGreen(金錢管理))  // 避免與成長建構重疊
+  ) {
+    return "stable"
+  }
+
+  // 7. 成長建構（growing）
+  // 燈號條件：
+  // - 心理與規劃：🟢
+  // - 金錢管理：🟡～🟢
+  // - 資源連結：🟡～🟢
+  // - 儲備應變力：🟠～🟡
+  // - 六大指標中 🔴 不得超過一項
+  // 排除條件：若儲備應變力：🟢 且 金錢管理：🟢 且無 🔴，應往上檢查「成熟穩健型」（已在成熟穩健之後檢查）
+  if (
+    isGreen(心理與規劃) &&
+    (isYellow(金錢管理) || isGreen(金錢管理)) &&
+    (isYellow(資源連結) || isGreen(資源連結)) &&
+    (isOrange(儲備應變力) || isYellow(儲備應變力)) &&
+    redCount <= 1 &&
+    !(isGreen(儲備應變力) && isGreen(金錢管理) && redCount === 0)  // 避免與成熟穩健重疊
+  ) {
+    return "growing"
+  }
+
+  // 8. 成熟穩健（mature）- Strict only
+  // 燈號條件：
+  // - 至少三項指標為 🟢，且需包含以下兩類以上：儲備應變力、資源連結、心理與規劃
+  // - 其餘指標至少為 🟡
+  // - 六大指標中 🔴 為 0
+  // 排除條件：若任一核心承接指標（儲備／資源／心理）為 🟡 以下，不得判為成熟穩健型
+  const greenCount = allDimensions.filter((d) => isGreen(d)).length
+  const supportDimensionsGreen = supportDimensions.filter((d) => isGreen(d)).length
+  const allAtLeastYellow = allDimensions.every((d) => isYellowOrGreen(d))
+  const allSupportAtLeastYellow = supportDimensions.every((d) => isYellowOrGreen(d))
+  
+  if (
+    greenCount >= 3 &&
+    supportDimensionsGreen >= 2 &&
+    allAtLeastYellow &&
+    allSupportAtLeastYellow &&
+    redCount === 0
+  ) {
+    return "mature"
+  }
+
+  // ============================================
+  // 第二層：承接層判讀（Fallback Resolution）
+  // ============================================
+  // 當 Strict Classification 無任何結構命中時，系統需執行以下承接邏輯：
+  // 系統必須保證：至少命中其中一個承接型，不得回傳 UNCLASSIFIED 至使用者端
+  // ============================================
+
+  // Step 1｜檢查「吃力支撐型」條件
+  // - 若多數指標為 🟠，且 🔴 ≤ 1
+  // → 回判為「吃力支撐型」
+  // 排除條件：若資源連結 = 🟢，不得判為吃力支撐型（有外部支持系統，壓力不再完全由家庭內部承擔）
+  if (!isGreen(資源連結) && orangeCount >= 3 && redCount <= 1) {
+    return "struggling"
+  }
+
+  // Step 2｜檢查「資源卡住型」
+  // - 若資源連結 ≥ 🟡
+  // - 且 儲備 / 金錢 / 心理 中至少兩項為 🟠 或 🔴
+  // → 回判為「資源卡住型」
+  if (isYellowOrGreen(資源連結)) {
+    const weakDimensions = [儲備應變力, 金錢管理, 心理與規劃]
+    const weakCount = weakDimensions.filter((d) => isOrangeOrRed(d)).length
+    if (weakCount >= 2) {
+      return "stuck"
+    }
+  }
+
+  // Step 3｜檢查「人脈承接型」
+  // - 若 資源連結 = 🟢 且 心理與規劃 = 🟢
+  // - 且 儲備應變力 ≠ 🟢
+  // → 回判為「人脈承接型」
+  if (isGreen(資源連結) && isGreen(心理與規劃) && !isGreen(儲備應變力)) {
+    return "supported"
+  }
+
+  // 如果以上承接邏輯都未命中，回判為「吃力支撐型」（最終兜底）
+  // 排除條件：若資源連結 = 🟢，不得判為吃力支撐型，改判為「資源卡住型」或「人脈承接型」
+  // 確保系統永遠只輸出一個可理解的結構型態
+  if (isGreen(資源連結)) {
+    // 如果資源連結 = 🟢，優先判為「資源卡住型」或「人脈承接型」
+    if (isGreen(心理與規劃) && !isGreen(儲備應變力)) {
+      return "supported"
+    }
+    return "stuck"
+  }
+  return "struggling"
+}
+
+function determineAnimalType(
+  dimensions: DimensionScores,
+  answers: Record<number, number>
+): AnimalType {
+  // ============================================
+  // 【雙層結構承接判讀法（DSRM）— 動物指標判讀】
+  // ============================================
+  // STEP 1. Strict Classification（嚴格結構判讀）
+  //   → 若命中任一動物，直接回傳結果
+  //
+  // STEP 2. Fallback Resolution（承接層）
+  //   → 若 STEP 1 無命中，進入承接型結構檢查
+  //
+  // STEP 3. Nearest-Structure Matching（結構相似度比對）
+  //   → 若前兩層都無命中，使用相似度比對
+  //
+  // ⚠️ 對使用者永遠只回傳一隻動物
+  // ⚠️ 系統內可標記 strict / fallback，但前端不顯示
+  // ============================================
+
+  const {
+    收入穩定度,
+    儲備應變力,
+    債務與保障,
+    金錢管理,
+    資源連結,
+    心理與規劃,
+  } = dimensions
+
+  // 燈號轉換函數（唯一標準）
+  // 🔴 0–7
+  // 🟠 8–15
+  // 🟡 16–23
+  // 🟢 24–30
+
+  // 輔助函數：判斷分數區間
+  const isRed = (score: number) => score >= 0 && score <= 7
+  const isOrange = (score: number) => score >= 8 && score <= 15
+  const isYellow = (score: number) => score >= 16 && score <= 23
+  const isGreen = (score: number) => score >= 24 && score <= 30
+  const isOrangeOrRed = (score: number) => score >= 0 && score <= 15
+  const isYellowOrGreen = (score: number) => score >= 16 && score <= 30
+
+  // 先定義六大指標陣列，用於檢查
+  const allDimensions = [收入穩定度, 儲備應變力, 債務與保障, 金錢管理, 資源連結, 心理與規劃]
+
+  // 先定義共用變數
+  const hasRed = allDimensions.some((d) => isRed(d))
+  const greenCount = allDimensions.filter((d) => isGreen(d)).length
+  const orangeCount = allDimensions.filter((d) => isOrange(d)).length
+  const yellowCount = allDimensions.filter((d) => isYellow(d)).length
+  const totalRedCount = allDimensions.filter((d) => isRed(d)).length
+
+  // 定義核心三項（用於多個動物判定）
+  const coreDimensions = [收入穩定度, 儲備應變力, 心理與規劃]
+  const coreAllYellowOrGreen = coreDimensions.every((d) => isYellowOrGreen(d))
+
+  // ============================================
+  // 第一層：嚴格結構判讀（Strict Classification）
+  // ============================================
+
+  // 🐱 1. 貓｜高風險疊加型
+  // 判定條件（符合任一即成立）：
+  // - 🔴 ≥ 2 且 R = 🔴
+  // - 或：R = 🔴 且（D / L / P 任一為 🔴）
+  // - 或：「R、D、L、P」中 🔴 ≥ 3
+  // 排他：🟢 = 0（不得有任何綠燈）
+  const criticalDimensions = [儲備應變力, 債務與保障, 資源連結, 心理與規劃] // R、D、L、P
+  const criticalRedCount = criticalDimensions.filter((d) => isRed(d)).length
+  
+  if (
+    greenCount === 0 && ( // 排他：🟢 = 0
+      (totalRedCount >= 2 && isRed(儲備應變力)) || // 條件1：🔴 ≥ 2 且 R = 🔴
+      (isRed(儲備應變力) && (isRed(債務與保障) || isRed(資源連結) || isRed(心理與規劃))) || // 條件2：R = 🔴 且（D / L / P 任一為 🔴）
+      criticalRedCount >= 3 // 條件3：「R、D、L、P」中 🔴 ≥ 3
+    )
+  ) {
+    return "cat"
+  }
+
+  // 🐜 2. 螞蟻｜單一支撐型
+  // 必要條件（全部成立）：
+  // - I ≥ 🟢 或 🟡+（收入穩定度 ≥ 🟢 或 ≥ 20）
+  // - R ≤ 🟠（儲備應變力 ≤ 🟠）
+  // - P ≤ 🟠（心理與規劃 ≤ 🟠）
+  // - L ≤ 🟠（資源連結 ≤ 🟠）
+  // 排他：
+  // - 若同時符合 🐱 → 歸 🐱（已在貓之後檢查）
+  // - R 不得為 🟢
+  if (
+    (isGreen(收入穩定度) || (isYellow(收入穩定度) && 收入穩定度 >= 20)) && // 條件1：I ≥ 🟢 或 🟡+
+    isOrangeOrRed(儲備應變力) && // 條件2：R ≤ 🟠
+    !isGreen(儲備應變力) && // 排他：R 不得為 🟢
+    isOrangeOrRed(心理與規劃) && // 條件3：P ≤ 🟠
+    isOrangeOrRed(資源連結) // 條件4：L ≤ 🟠
+  ) {
+    return "ant"
+  }
+
+  // 🐘 3. 大象｜結構型脆弱
+  // 必要條件：
+  // - I = 🟢
+  // - R = 🟠
+  // - P = 🔴 或 L = 🔴（至少一項）
+  // 排他：
+  // - P ≠ 🟢
+  // - L ≠ 🟢
+  if (
+    isGreen(收入穩定度) && // 條件1：I = 🟢
+    isOrange(儲備應變力) && // 條件2：R = 🟠
+    (isRed(心理與規劃) || isRed(資源連結)) && // 條件3：P = 🔴 或 L = 🔴（至少一項）
+    !isGreen(心理與規劃) && // 排他：P ≠ 🟢
+    !isGreen(資源連結) // 排他：L ≠ 🟢
+  ) {
+    return "elephant"
+  }
+
+  // 🐂 4. 牛｜高負荷撐持型
+  // 必要條件：
+  // - I = 🟢
+  // - R = 🟠
+  // - P = 🟡
+  // - L ≤ 🟠
+  // 排他：
+  // - 不得有 🔴
+  // - 若 P ≤ 🟠 且 L ≤ 🟠 → 轉 🐜（已通過 P = 🟡 排除）
+  // - 若六項皆 🟠 → 轉 🐪（已通過 I = 🟢 排除）
+  if (
+    !hasRed && // 排他：不得有 🔴
+    isGreen(收入穩定度) && // 條件1：I = 🟢
+    isOrange(儲備應變力) && // 條件2：R = 🟠
+    isYellow(心理與規劃) && // 條件3：P = 🟡
+    isOrangeOrRed(資源連結) // 條件4：L ≤ 🟠
+  ) {
+    return "ox"
+  }
+
+  // 🐪 CAMEL｜撐很久的駱駝（慢性全面吃力型）- Strict only
+  // 必要條件：
+  // - green_count == 0
+  // - red_count == 0
+  // - (all == ORANGE OR (orange_count == 5 AND yellow_count == 1))
+  const coreOrangeCount = coreDimensions.filter((d) => isOrange(d)).length
+  
+  if (
+    greenCount === 0 && // green_count == 0
+    !hasRed && // red_count == 0
+    (orangeCount === 6 || (orangeCount === 5 && yellowCount === 1)) // all == ORANGE OR (orange_count == 5 AND yellow_count == 1)
+  ) {
+    return "camel"
+  }
+
+  // 🐢 TURTLE｜穩定前行的烏龜（日常穩定型）- Strict only
+  // 必要條件：
+  // - red_count == 0
+  // - green_count == 0
+  // - orange_count <= 1
+  // - income >= YELLOW
+  // - reserve >= YELLOW
+  // - mental >= YELLOW
+  const allAtLeastYellowForTurtle = allDimensions.every((d) => isYellowOrGreen(d))
+  
+  if (
+    !hasRed && // red_count == 0
+    greenCount === 0 && // green_count == 0
+    orangeCount <= 1 && // orange_count <= 1
+    allAtLeastYellowForTurtle && // 六項皆 ≥ 🟡
+    coreAllYellowOrGreen // income >= YELLOW, reserve >= YELLOW, mental >= YELLOW
+  ) {
+    return "turtle"
+  }
+
+  // 🐎 HORSE｜穩健奔跑的馬（成熟韌性型）- Strict only
+  // 必要條件：
+  // - green_count >= 4
+  // - red_count == 0
+  // - orange_count == 0
+  // - count_green(reserve, resource, mental) >= 2
+  const supportDimensions = [儲備應變力, 資源連結, 心理與規劃] // R / L / P
+  const supportGreenCount = supportDimensions.filter((d) => isGreen(d)).length
+  const allAtLeastYellow = allDimensions.every((d) => isYellowOrGreen(d))
+  
+  if (
+    greenCount >= 4 && // green_count >= 4
+    !hasRed && // red_count == 0
+    orangeCount === 0 && // orange_count == 0
+    supportGreenCount >= 2 && // count_green(reserve, resource, mental) >= 2
+    allAtLeastYellow // 其餘指標至少為 🟡（確保結構完整）
+  ) {
+    return "horse"
+  }
+
+  // ============================================
+  // 第二層：承接型結構（Fallback Enabled）
+  // ============================================
+  // 下列動物：
+  // - 可被嚴格命中
+  // - 也可在第一層無命中時，由 fallback 使用
+  // ============================================
+
+  // 定義猴子相關變數（提前定義，供其他動物使用）
+  const monkeyDimensions = [收入穩定度, 儲備應變力, 金錢管理, 債務與保障]
+  const monkeyLowCount = monkeyDimensions.filter((d) => isOrangeOrRed(d)).length
+  const criticalForMonkey = [儲備應變力, 債務與保障, 金錢管理]
+  const criticalAllYellowOrGreen = criticalForMonkey.every((d) => isYellowOrGreen(d))
+
+  // 🦭 OTTER｜水獺（依賴型安全網）- Fallback Enabled
+  // 必要條件：
+  // - L = 🟢
+  // - P ≥ 🟡
+  // - 在 I / R / M 中，≥ 2 項 ≤ 🟠
+  // 排他：
+  // - 若 P = 🟢 且 L = 🟢 → 轉 🐒（已在猴子之後檢查）
+  // - 🔴 ≥ 2 → 不得為水獺
+  const financialDimensions = [收入穩定度, 儲備應變力, 金錢管理] // I / R / M
+  const lowFinancialCount = financialDimensions.filter((d) => isOrangeOrRed(d)).length
+  
+  if (
+    isGreen(資源連結) && // 條件1：L = 🟢
+    isYellowOrGreen(心理與規劃) && // 條件2：P ≥ 🟡
+    lowFinancialCount >= 2 && // 條件3：在 I / R / M 中，≥ 2 項 ≤ 🟠
+    totalRedCount < 2 && // 排他：🔴 ≥ 2 → 不得為水獺
+    !(isGreen(心理與規劃) && isGreen(資源連結) && lowFinancialCount >= 2) // 排他：若 P = 🟢 且 L = 🟢 → 轉 🐒
+  ) {
+    return "otter"
+  }
+
+  // 🐒 MONKEY｜猴子（社會韌性型）- Fallback Enabled
+  // 必要條件：
+  // - L = 🟢
+  // - P = 🟢
+  // - 在 I / R / M / D 中，≥ 2 項 ≤ 🟠
+  // 排他：
+  // - 不得有 🔴
+  // - 若 R / M / D 全 ≥ 🟡 → 轉 🦅（已在老鷹之後檢查）
+  if (
+    !hasRed && // 排他：不得有 🔴
+    isGreen(資源連結) && // 條件1：L = 🟢
+    isGreen(心理與規劃) && // 條件2：P = 🟢
+    monkeyLowCount >= 2 && // 條件3：在 I / R / M / D 中，≥ 2 項 ≤ 🟠
+    !criticalAllYellowOrGreen // 排他：若 R / M / D 全 ≥ 🟡 → 轉 🦅
+  ) {
+    return "monkey"
+  }
+
+  // 🐿️ SQUIRREL｜松鼠（保護網型受傷）- Fallback Enabled
+  // 必要條件：
+  // - L = 🟢
+  // - D = 🟢
+  // - R 或 P 至少 1 項 = 🟠
+  // 排他：
+  // - 不得有 🔴
+  // - 若 P = 🟢 且弱項 ≥ 2 → 轉 🐒（已在猴子之後檢查）
+  // - 若 R = 🟢 且其餘多為 🟡 → 轉 🐢（已在烏龜之後檢查）
+  if (
+    !hasRed && // 排他：不得有 🔴
+    isGreen(資源連結) && // 條件1：L = 🟢
+    isGreen(債務與保障) && // 條件2：D = 🟢
+    (isOrange(儲備應變力) || isOrange(心理與規劃)) && // 條件3：R 或 P 至少 1 項 = 🟠
+    !(isGreen(心理與規劃) && monkeyLowCount >= 2) // 排他：若 P = 🟢 且弱項 ≥ 2 → 轉 🐒
+  ) {
+    return "squirrel"
+  }
+
+  // 🐻 BEAR｜小熊（恢復中狀態）- Fallback Enabled
+  // 必要條件：
+  // - L = 🟢
+  // - P = 🟢
+  // - 在 I / R / M / D 中：≥ 1 項 ≤ 🟠，≥ 1 項 ≥ 🟡
+  // 排他：
+  // - 不得符合 🐒（已在猴子之後檢查）
+  // - 不得有 🔴
+  const bearDimensions = [收入穩定度, 儲備應變力, 金錢管理, 債務與保障] // I / R / M / D
+  const bearLowCount = bearDimensions.filter((d) => isOrangeOrRed(d)).length
+  const bearHighCount = bearDimensions.filter((d) => isYellowOrGreen(d)).length
+  
+  if (
+    !hasRed && // 排他：不得有 🔴
+    isGreen(資源連結) && // 條件1：L = 🟢
+    isGreen(心理與規劃) && // 條件2：P = 🟢
+    bearLowCount >= 1 && // 條件3：≥ 1 項 ≤ 🟠
+    bearHighCount >= 1 && // 條件4：≥ 1 項 ≥ 🟡
+    bearLowCount < 2 // 排他：不得符合 🐒（猴子需要至少2項≤🟠）
+  ) {
+    return "bear"
+  }
+
+  // 🐶 DOG｜小狗（心理啟動型）- Fallback Enabled
+  // 必要條件：
+  // - P = 🟢 或 ≥ 🟡
+  // - R ≤ 🟠
+  // - M ≤ 🟠
+  // 限制：
+  // - 🔴 < 2
+  // 排他：
+  // - 若 L = 🟢 且 P = 🟢 且弱項 ≥ 2 → 轉 🐒（已在猴子之後檢查）
+  // - 若 P = 🟢 且 M = 🟢 → 轉 🦅（已在老鷹之後檢查）
+  if (
+    isYellowOrGreen(心理與規劃) && // 條件1：P = 🟢 或 ≥ 🟡
+    isOrangeOrRed(儲備應變力) && // 條件2：R ≤ 🟠
+    isOrangeOrRed(金錢管理) && // 條件3：M ≤ 🟠
+    totalRedCount < 2 && // 限制：🔴 < 2
+    !(isGreen(資源連結) && isGreen(心理與規劃) && monkeyLowCount >= 2) && // 排他：若 L = 🟢 且 P = 🟢 且弱項 ≥ 2 → 轉 🐒
+    !(isGreen(心理與規劃) && isGreen(金錢管理)) // 排他：若 P = 🟢 且 M = 🟢 → 轉 🦅
+  ) {
+    return "dog"
+  }
+
+  // 🦅 EAGLE｜老鷹（高能力低安全網）- Fallback Enabled
+  // 必要條件：
+  // - mental == GREEN
+  // - management == GREEN
+  // - count_leq_ORANGE(reserve, debt, resource) >= 1
+  // - red_count == 0
+  const eagleConditionA = isOrangeOrRed(儲備應變力) || isOrangeOrRed(債務與保障) || isOrangeOrRed(資源連結)
+  const eagleConditionB = isYellow(儲備應變力) && isYellow(資源連結) && isGreen(債務與保障)
+  
+  if (
+    !hasRed && // red_count == 0
+    isGreen(心理與規劃) && // mental == GREEN
+    isGreen(金錢管理) && // management == GREEN
+    (eagleConditionA || eagleConditionB) // count_leq_ORANGE(reserve, debt, resource) >= 1
+  ) {
+    return "eagle"
+  }
+
+  // ============================================
+  // 第三層：結構相似度比對（Nearest-Structure Matching）
+  // ============================================
+  // 若前兩層都無命中，使用相似度比對
+  // 燈號轉數值：RED = 0, ORANGE = 1, YELLOW = 2, GREEN = 3
+  // ============================================
+  
+  // 將燈號轉換為數值
+  const lightToValue = (score: number): number => {
+    if (isRed(score)) return 0
+    if (isOrange(score)) return 1
+    if (isYellow(score)) return 2
+    if (isGreen(score)) return 3
+    return 0
+  }
+
+  const userVector = allDimensions.map(lightToValue)
+
+  // 動物原型向量（按照規格定義）
+  const animalPrototypes: Record<AnimalType, number[]> = {
+    cat: [0, 0, 0, 1, 0, 0],      // 高風險疊加型
+    ant: [3, 0, 2, 1, 1, 1],       // 單一支撐型
+    elephant: [3, 1, 1, 1, 0, 0],  // 結構型脆弱
+    ox: [3, 1, 2, 2, 1, 2],        // 高負荷撐持型
+    camel: [1, 1, 1, 1, 1, 1],     // 慢性全面吃力型
+    turtle: [2, 2, 2, 2, 2, 2],    // 日常穩定型
+    otter: [1, 1, 1, 1, 3, 2],     // 依賴型安全網
+    monkey: [1, 1, 1, 1, 3, 3],    // 社會韌性型
+    squirrel: [2, 1, 3, 2, 3, 1],  // 保護網型受傷
+    bear: [1, 1, 2, 2, 3, 3],      // 恢復中狀態
+    dog: [2, 1, 2, 1, 2, 3],       // 心理啟動型
+    eagle: [2, 1, 2, 3, 2, 3],     // 高能力低安全網
+    horse: [3, 3, 3, 3, 3, 3],     // 成熟韌性型
+  }
+
+  // 計算 Manhattan distance
+  const manhattanDistance = (vec1: number[], vec2: number[]): number => {
+    return vec1.reduce((sum, val, i) => sum + Math.abs(val - vec2[i]), 0)
+  }
+
+  // 找出距離最近的動物
+  let minDistance = Infinity
+  let nearestAnimal: AnimalType = "turtle" // 預設為烏龜
+
+  for (const [animal, prototype] of Object.entries(animalPrototypes)) {
+    const distance = manhattanDistance(userVector, prototype)
+    if (distance < minDistance) {
+      minDistance = distance
+      nearestAnimal = animal as AnimalType
+    }
+  }
+
+  // 返回最接近的動物（確保永遠只輸出一個可理解的結構型態）
+  return nearestAnimal
+}
+
+function determinePriorities(answers: Record<number, number>): string[] {
+  const priorities: string[] = []
+
+  // 1. 緊急經濟援助（題1或題5顯示狀態較弱）
+  if (answers[1] <= 3 || answers[5] <= 3) {
+    priorities.push("緊急經濟援助")
+  }
+
+  // 2. 債務管理（題4顯示狀態較弱）
+  if (answers[4] <= 3) {
+    priorities.push("債務管理")
+  }
+
+  // 3. 儲蓄培養（題3顯示狀態較弱）
+  if (answers[3] <= 3) {
+    priorities.push("儲蓄培養")
+  }
+
+  // 4. 金融教育（題7或題8顯示狀態較弱）
+  if (answers[7] <= 3 || answers[8] <= 3) {
+    priorities.push("金融教育")
+  }
+
+  // 5. 就業支持（題2顯示狀態較弱）
+  if (answers[2] <= 3) {
+    priorities.push("就業支持")
+  }
+
+  // 6. 金融服務連結（題6顯示狀態較弱）
+  if (answers[6] <= 3) {
+    priorities.push("金融服務連結")
+  }
+
+  // 7. 社會網絡建立（題9顯示狀態較弱）
+  if (answers[9] <= 3) {
+    priorities.push("社會網絡建立")
+  }
+
+  // 8. 心理支持（題10顯示狀態較弱）
+  if (answers[10] <= 3) {
+    priorities.push("心理支持")
+  }
+
+  return priorities
+}
