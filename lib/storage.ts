@@ -163,5 +163,3 @@ export function getLastSnapshot(): QuestionnaireSnapshot | null {
     return null
   }
 }
-
-
