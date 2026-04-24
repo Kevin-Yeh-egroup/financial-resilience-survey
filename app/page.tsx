@@ -5,7 +5,7 @@ import { QuestionnaireForm } from "@/components/questionnaire-form"
 import { ResultsDisplay } from "@/components/results-display"
 import { TransitionAnimation } from "@/components/transition-animation"
 import type { QuestionnaireResult } from "@/types/questionnaire"
-import { saveLastSnapshot, saveResult } from "@/lib/storage"
+import { saveLastQuestionnaireProfile, saveLastSnapshot, saveResult } from "@/lib/storage"
 import { Button } from "@/components/ui/button"
 
 const CAMEL_DEMO_RESULT: QuestionnaireResult = {
@@ -33,6 +33,11 @@ export default function Home() {
     // 儲存結果到本地儲存
     saveResult(completedResult.dimensionScores)
     saveLastSnapshot(completedResult.totalScore)
+    saveLastQuestionnaireProfile({
+      animalType: completedResult.animalType,
+      structureType: completedResult.structureType,
+      totalScore: completedResult.totalScore,
+    })
     // 先顯示轉換動畫，保存結果
     setPendingResult(completedResult)
     setShowTransition(true)
@@ -66,12 +71,17 @@ export default function Home() {
                 <Button
                   onClick={() => {
                     saveLastSnapshot(CAMEL_DEMO_RESULT.totalScore)
+                    saveLastQuestionnaireProfile({
+                      animalType: CAMEL_DEMO_RESULT.animalType,
+                      structureType: CAMEL_DEMO_RESULT.structureType,
+                      totalScore: CAMEL_DEMO_RESULT.totalScore,
+                    })
                     setResult(CAMEL_DEMO_RESULT)
                   }}
                 >
                   查看駱駝範例結果
                 </Button>
-                <p className="text-sm text-muted-foreground">可直接檢視「體感 → 個人中心解鎖客觀分析」流程。</p>
+                <p className="text-sm text-muted-foreground">可直接檢視「自我評估 → 個人中心解鎖客觀分析」流程。</p>
               </div>
             </div>
             <QuestionnaireForm onComplete={handleComplete} />

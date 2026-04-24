@@ -3,10 +3,19 @@
  * 用於儲存和讀取使用者的評估結果，計算平均值
  */
 
-import type { DimensionScores } from "@/types/questionnaire"
+import type { AnimalType, DimensionScores, StructureType } from "@/types/questionnaire"
 
 const STORAGE_KEY = "questionnaire_results"
 const LAST_SNAPSHOT_KEY = "questionnaire_last_snapshot"
+const LAST_PROFILE_KEY = "questionnaire_last_profile_v1"
+
+/** 最近一次自我評估的類型與分數，供個人中心模擬各工具結果 */
+export interface LastQuestionnaireProfile {
+  animalType: AnimalType
+  structureType: StructureType
+  totalScore: number
+  updatedAt: number
+}
 
 export interface QuestionnaireSnapshot {
   totalScore: number
@@ -132,7 +141,7 @@ export function clearAllResults(): void {
 }
 
 /**
- * 儲存最近一次體感評估總分（供個人中心顯示與較上次變化）
+ * 儲存最近一次自我評估總分（供個人中心顯示與較上次變化）
  */
 export function saveLastSnapshot(totalScore: number): void {
   if (typeof window === "undefined") return
@@ -160,6 +169,35 @@ export function getLastSnapshot(): QuestionnaireSnapshot | null {
     return JSON.parse(raw) as QuestionnaireSnapshot
   } catch (error) {
     console.error("Failed to read last snapshot:", error)
+    return null
+  }
+}
+
+export function saveLastQuestionnaireProfile(payload: {
+  animalType: AnimalType
+  structureType: StructureType
+  totalScore: number
+}): void {
+  if (typeof window === "undefined") return
+  try {
+    const full: LastQuestionnaireProfile = {
+      ...payload,
+      updatedAt: Date.now(),
+    }
+    localStorage.setItem(LAST_PROFILE_KEY, JSON.stringify(full))
+  } catch (e) {
+    console.error("Failed to save questionnaire profile:", e)
+  }
+}
+
+export function getLastQuestionnaireProfile(): LastQuestionnaireProfile | null {
+  if (typeof window === "undefined") return null
+  try {
+    const raw = localStorage.getItem(LAST_PROFILE_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as LastQuestionnaireProfile
+  } catch (e) {
+    console.error("Failed to read questionnaire profile:", e)
     return null
   }
 }

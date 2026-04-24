@@ -773,7 +773,7 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
         </Card>
       )}
 
-      {/* 7. 個人中心引導（體感版 -> 客觀版） */}
+      {/* 7. 個人中心引導（自我評估 → 客觀版） */}
       <Card className="p-6 md:p-8 border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background">
         <div className="space-y-5">
           <div className="flex flex-wrap items-center gap-2">
@@ -783,15 +783,15 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
             )}
           </div>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            你剛做完的是「體感版」快篩，像先量個體溫。接下來到個人中心，會看到同一套脈絡整理好的畫面：上面有總覽（這次體感幾分、跟上一次差多少），
-            下面用分頁排好真實財務韌性、詐騙防禦能力、財務焦慮、夢想達成財務管理（總覽裡還有財務生活記帳助理等工具列表）。每一項點開都有白話說明和「對你有什麼幫助」，
-            再按鈕連到官方工具頁去用。
+            你剛做完的是「自我評估版」快篩，像先量個體溫。接下來到個人中心，會看到同一套脈絡整理好的畫面：上面有總覽（這次自我評估幾分、跟上一次差多少），
+            下面用分頁排好真實財務韌性、詐騙防禦能力、財務焦慮、夢想達成財務管理（總覽裡還有財務生活記帳助理等工具列表）。每一項都直接列出白話說明、模擬結果與數據、「對你有什麼幫助」，
+            再一鍵連到官方工具頁去用。
           </p>
           <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-lg border bg-background/70 p-4">
               <p className="text-sm font-semibold">總覽：先看分數，心裡有底</p>
               <p className="mt-2 text-sm text-muted-foreground">
-                跟個人中心總覽一樣，會帶出你最近一次體感總分，以及「跟上次比多了還是少了」，不用自己記。
+                跟個人中心總覽一樣，會帶出你最近一次自我評估總分，以及「跟上次比多了還是少了」，不用自己記。
               </p>
             </div>
             <div className="rounded-lg border bg-background/70 p-4">
@@ -803,7 +803,7 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
             <div className="rounded-lg border bg-background/70 p-4">
               <p className="text-sm font-semibold">記帳、防詐、焦慮、夢想：同一頁找得到</p>
               <p className="mt-2 text-sm text-muted-foreground">
-                跟個人中心一樣，財務生活記帳助理、詐騙防禦能力、財務焦慮、夢想達成財務管理都列得出來；點標題會展開說明和好處，再一鍵開新分頁使用。
+                跟個人中心一樣，財務生活記帳助理、詐騙防禦能力、財務焦慮、夢想達成財務管理都列得出來；每項直接顯示說明、模擬數據與好處，再一鍵開新分頁使用。
               </p>
             </div>
             <div className="rounded-lg border bg-background/70 p-4">

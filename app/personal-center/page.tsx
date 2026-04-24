@@ -5,18 +5,21 @@ import Link from "next/link"
 import { format } from "date-fns"
 import { ArrowRight, LineChart, Sparkles } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { getLastSnapshot, type QuestionnaireSnapshot } from "@/lib/storage"
+import { ArchetypeToolMockupCard } from "@/components/archetype-tool-mockup-card"
+import { PerceptionVsRealityCompare } from "@/components/perception-vs-reality-compare"
+import { ANIMAL_MINI } from "@/lib/archetype-tool-mockups"
+import {
+  getLastQuestionnaireProfile,
+  getLastSnapshot,
+  type LastQuestionnaireProfile,
+  type QuestionnaireSnapshot,
+} from "@/lib/storage"
 import { cn } from "@/lib/utils"
+import type { AnimalType } from "@/types/questionnaire"
 
 type TabValue = "overview" | "resilience" | "fraud" | "anxiety" | "dream"
 
@@ -57,7 +60,7 @@ const TOOLS: Record<string, CenterTool> = {
     title: "真實財務韌性",
     summary: "用問卷跟分數，把你家現在「耐不耐撞、萬一沒收入能撐多久」講得白話一點、具體一點。",
     description:
-      "做完體感評估，心裡會有一個「感覺」。這裡再往前一步：用總分、六大面向，還有前後兩次的對照，看看是只有心裡慌，還是真的有地方要先補強。之後要跟家人談、要找資源，也比較說得出重點。",
+      "做完自我評估，心裡會有一個「感覺」。這裡再往前一步：用總分、六大面向，還有前後兩次的對照，看看是只有心裡慌，還是真的有地方要先補強。之後要跟家人談、要找資源，也比較說得出重點。",
     benefits: [
       "知道自己哪一塊比較穩、哪一塊比較薄，不會什麼都一起擔心。",
       "可以回看上次跟這次有沒有變好，不是做完就忘。",
@@ -89,7 +92,7 @@ const TOOLS: Record<string, CenterTool> = {
     benefits: [
       "比較不會覺得「只有我一個人在慌」——先被理解，心就會鬆一點。",
       "會用白話整理你可以試的小方向，不是做完就丟你一個抽象名詞。",
-      "若你也有做體感或真實評估，可以一起看：心裡很慌的時候，跟實際狀況是不是同一回事。",
+      "若你也有做自我評估或真實評估，可以一起看：心裡很慌的時候，跟實際狀況是不是同一回事。",
     ],
     href: "https://www.familyfinhealth.com/financial-anxiety",
     ctaLabel: "開始財務焦慮檢測",
@@ -166,6 +169,41 @@ function ToolBenefitsBlock({ tool }: { tool: CenterTool }) {
   )
 }
 
+function ToolFullSection({
+  tool,
+  animalType,
+  totalScore,
+}: {
+  tool: CenterTool
+  animalType: AnimalType | null
+  totalScore: number | null
+}) {
+  return (
+    <Card className="overflow-hidden border-2 border-border/70 bg-card/95 shadow-sm">
+      <div className="border-b border-border/60 bg-muted/20 px-5 py-4">
+        <h2 className="text-lg font-bold tracking-tight text-foreground md:text-xl">{tool.title}</h2>
+      </div>
+      <div className="space-y-5 px-5 py-5">
+        <p className="text-sm leading-relaxed text-muted-foreground">{tool.description}</p>
+        <ArchetypeToolMockupCard toolId={tool.id} animalType={animalType} totalScore={totalScore} />
+        <ToolBenefitsBlock tool={tool} />
+        <ToolHeroPanel tool={tool} />
+        <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:justify-end">
+          <Button asChild size="lg" className="w-full sm:w-auto">
+            <a href={tool.href} target="_blank" rel="noopener noreferrer">
+              {tool.ctaLabel}
+              <ArrowRight className="ml-2 size-4" />
+            </a>
+          </Button>
+        </div>
+        <p className="text-center text-xs text-muted-foreground sm:text-right">
+          將於新分頁開啟官方工具
+        </p>
+      </div>
+    </Card>
+  )
+}
+
 function ToolHeroPanel({ tool }: { tool: CenterTool }) {
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 p-6 text-white shadow-lg md:p-8">
@@ -200,9 +238,11 @@ function ToolHeroPanel({ tool }: { tool: CenterTool }) {
 
 export default function PersonalCenterPage() {
   const [snapshot, setSnapshot] = useState<QuestionnaireSnapshot | null>(null)
+  const [profile, setProfile] = useState<LastQuestionnaireProfile | null>(null)
 
   useEffect(() => {
     setSnapshot(getLastSnapshot())
+    setProfile(getLastQuestionnaireProfile())
   }, [])
 
   const lastUpdated =
@@ -218,12 +258,17 @@ export default function PersonalCenterPage() {
   const deltaText =
     delta === null ? "較上次 —" : `較上次 ${delta >= 0 ? "+" : ""}${delta} 分`
 
+  const archetypeLabel =
+    profile != null
+      ? `${ANIMAL_MINI[profile.animalType].emoji} ${ANIMAL_MINI[profile.animalType].title}`
+      : null
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
       <div className="container mx-auto max-w-4xl px-4 py-8 md:py-12">
         <p className="mb-6 text-center text-sm text-muted-foreground md:text-left">
           <Link href="/" className="font-medium text-primary underline-offset-4 hover:underline">
-            ← 回到體感評估
+            ← 回到自我評估
           </Link>
         </p>
 
@@ -242,6 +287,11 @@ export default function PersonalCenterPage() {
               <Badge variant="secondary" className="rounded-full bg-primary/15 text-primary">
                 專屬個人資料
               </Badge>
+              {archetypeLabel != null ? (
+                <Badge variant="secondary" className="rounded-full bg-violet-100/90 text-violet-950 dark:bg-violet-950/40 dark:text-violet-100">
+                  自我評估狀態：{archetypeLabel}
+                </Badge>
+              ) : null}
             </div>
           </div>
 
@@ -249,14 +299,16 @@ export default function PersonalCenterPage() {
             <div className="flex items-start gap-4">
               <Avatar className="size-14 border-2 border-primary/20">
                 <AvatarFallback className="bg-primary/10 text-lg font-semibold text-primary">
-                  會
+                  {profile != null ? ANIMAL_MINI[profile.animalType].emoji : "會"}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1 space-y-1">
                 <p className="truncate font-semibold">會員</p>
-                <p className="truncate text-sm text-muted-foreground">登入後顯示完整資料</p>
+                <p className="truncate text-sm text-muted-foreground">
+                  {archetypeLabel != null ? `目前以「${archetypeLabel}」模擬各工具預覽` : "登入後顯示完整資料"}
+                </p>
                 <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
-                  體感財務韌性 {scoreDisplay} 分
+                  自我評估財務韌性 {scoreDisplay} 分
                 </p>
               </div>
             </div>
@@ -282,7 +334,7 @@ export default function PersonalCenterPage() {
                 <>
                   <Card className="relative overflow-hidden border-2 border-border/80 bg-card p-6 shadow-sm md:p-8">
                     <LineChart className="absolute right-4 top-4 size-8 text-primary/30" aria-hidden />
-                    <p className="text-sm font-medium text-muted-foreground">體感財務韌性</p>
+                    <p className="text-sm font-medium text-muted-foreground">自我評估財務韌性</p>
                     <p className="mt-2 text-5xl font-bold tabular-nums text-foreground md:text-6xl">
                       {scoreDisplay}
                       <span className="text-2xl font-semibold text-muted-foreground md:text-3xl">
@@ -293,7 +345,7 @@ export default function PersonalCenterPage() {
                     <p className="mt-2 text-sm text-muted-foreground">{deltaText}</p>
                     {snapshot == null ? (
                       <p className="mt-4 text-sm text-muted-foreground">
-                        尚未有體感評估紀錄，可先{" "}
+                        尚未有自我評估紀錄，可先{" "}
                         <Link href="/" className="font-medium text-primary underline-offset-4 hover:underline">
                           完成首測
                         </Link>
@@ -302,70 +354,31 @@ export default function PersonalCenterPage() {
                     ) : null}
                   </Card>
 
-                  <Accordion
-                    type="single"
-                    collapsible
-                    defaultValue="accounting"
-                    className="w-full rounded-xl border bg-card/60 px-2"
-                  >
-                    {TAB_TOOL_IDS.overview.map((id) => {
-                      const tool = TOOLS[id]
-                      return (
-                        <AccordionItem key={tool.id} value={tool.id} className="border-border/60 px-2">
-                          <AccordionTrigger className="text-base font-semibold hover:no-underline">
-                            {tool.title}
-                          </AccordionTrigger>
-                          <AccordionContent className="space-y-4 pb-6">
-                            <p className="text-sm leading-relaxed text-muted-foreground">
-                              {tool.description}
-                            </p>
-                            <ToolBenefitsBlock tool={tool} />
-                            <ToolHeroPanel tool={tool} />
-                            <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:justify-end">
-                              <Button asChild size="lg" className="w-full sm:w-auto">
-                                <a href={tool.href} target="_blank" rel="noopener noreferrer">
-                                  {tool.ctaLabel}
-                                  <ArrowRight className="ml-2 size-4" />
-                                </a>
-                              </Button>
-                            </div>
-                            <p className="text-center text-xs text-muted-foreground sm:text-right">
-                              將於新分頁開啟官方工具
-                            </p>
-                          </AccordionContent>
-                        </AccordionItem>
-                      )
-                    })}
-                  </Accordion>
+                  <div className="space-y-6">
+                    {TAB_TOOL_IDS.overview.map((id) => (
+                      <ToolFullSection
+                        key={id}
+                        tool={TOOLS[id]}
+                        animalType={profile?.animalType ?? null}
+                        totalScore={profile?.totalScore ?? snapshot?.totalScore ?? null}
+                      />
+                    ))}
+                  </div>
                 </>
               ) : (
-                <Accordion type="single" collapsible defaultValue={TAB_TOOL_IDS[value][0]} className="w-full rounded-xl border bg-card/60 px-2">
-                  {TAB_TOOL_IDS[value].map((id) => {
-                    const tool = TOOLS[id]
-                    return (
-                      <AccordionItem key={tool.id} value={tool.id} className="border-border/60 px-2">
-                        <AccordionTrigger className="text-base font-semibold hover:no-underline">
-                          {tool.title}
-                        </AccordionTrigger>
-                        <AccordionContent className="space-y-4 pb-6">
-                          <p className="text-sm leading-relaxed text-muted-foreground">
-                            {tool.description}
-                          </p>
-                          <ToolBenefitsBlock tool={tool} />
-                          <ToolHeroPanel tool={tool} />
-                          <div className="flex justify-end">
-                            <Button asChild size="lg">
-                              <a href={tool.href} target="_blank" rel="noopener noreferrer">
-                                {tool.ctaLabel}
-                                <ArrowRight className="ml-2 size-4" />
-                              </a>
-                            </Button>
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                    )
-                  })}
-                </Accordion>
+                <>
+                  {value === "resilience" ? <PerceptionVsRealityCompare /> : null}
+                  <div className="space-y-6">
+                    {TAB_TOOL_IDS[value].map((id) => (
+                      <ToolFullSection
+                        key={id}
+                        tool={TOOLS[id]}
+                        animalType={profile?.animalType ?? null}
+                        totalScore={profile?.totalScore ?? snapshot?.totalScore ?? null}
+                      />
+                    ))}
+                  </div>
+                </>
               )}
             </TabsContent>
           ))}
