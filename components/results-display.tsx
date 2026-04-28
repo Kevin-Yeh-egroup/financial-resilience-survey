@@ -765,25 +765,6 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
         )}
       </Card>
 
-      {/* 6. 目前可優先討論的方向（可複選） */}
-      {result.priorities.length > 0 && (
-        <Card className="p-6 md:p-8 bg-card/80 backdrop-blur-sm border-2">
-          <h3 className="text-xl font-semibold mb-2">目前可優先討論的方向</h3>
-          <p className="text-base text-muted-foreground mb-6">
-            依據你的填答，以下方向值得優先整理：
-          </p>
-          <div className="space-y-3">
-            {result.priorities.map((priority, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-3 p-4 rounded-lg bg-accent/30 border border-border/50"
-              >
-                <span className="text-base font-medium">{priority}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
 
       {/* 7. 你的評估還差一半 */}
       <Card className="p-6 md:p-8 border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-background to-background">
