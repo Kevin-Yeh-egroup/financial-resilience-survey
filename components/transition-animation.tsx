@@ -36,9 +36,9 @@ export function TransitionAnimation({ onComplete }: TransitionAnimationProps) {
   }, [onComplete])
 
   const lines = [
-    "這不是一份評分表，",
-    "而是一張幫你找出",
-    "「哪些地方在撐你、哪些地方需要被接住」的地圖。",
+    "你已完成自我評估的第一步，",
+    "接下來，讓我們看看",
+    "你的感覺，與實際財務狀況是否一致。",
   ]
 
   return (

@@ -150,7 +150,7 @@ export function PerceptionVsRealityCompare() {
 
         <div className="rounded-xl border-2 border-violet-200/70 bg-gradient-to-b from-violet-50/90 to-card/80 p-4 dark:border-violet-900/50 dark:from-violet-950/35 dark:to-card/50 md:p-5">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge className="bg-violet-600 text-white hover:bg-violet-600">真實財務韌性</Badge>
+            <Badge className="bg-violet-600 text-white hover:bg-violet-600">現實財務韌性</Badge>
             <Badge variant="secondary">模擬 · 施測結果已同步</Badge>
             {!ready ? (
               <span className="text-xs text-muted-foreground">載入中…</span>

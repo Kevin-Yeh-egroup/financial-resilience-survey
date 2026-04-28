@@ -371,15 +371,29 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* 1. 整體財務韌性分數 */}
+      {/* 1. 財務韌性（自我評估）分數 */}
       <Card className={`p-6 md:p-8 border-2 ${scoreConfig.borderColor} ${scoreConfig.bgColor}`}>
         <div className="text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-2">整體財務韌性分數</h2>
+          <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-background/60 border border-border/50 text-sm text-muted-foreground">
+            <span>✅ 已完成 50%</span>
+            <span className="text-border">·</span>
+            <span>財務韌性自我評估</span>
+          </div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">你的財務韌性（自我評估）</h2>
           <div className={`text-6xl md:text-7xl font-bold mb-2 ${scoreConfig.color}`}>
             {result.totalScore}
           </div>
-          <p className={`text-lg font-medium mb-8 ${scoreConfig.color}`}>{scoreConfig.label}</p>
-          <div className="max-w-2xl mx-auto mt-8">
+          <p className={`text-lg font-medium ${scoreConfig.color}`}>{scoreConfig.label}</p>
+          <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-background/80 border border-orange-200 dark:border-orange-900">
+            <span className="text-base">⏳</span>
+            <span className="text-sm font-medium text-orange-700 dark:text-orange-400">
+              現實財務韌性評估尚未完成
+            </span>
+          </div>
+          <p className="mt-3 text-sm text-muted-foreground">
+            完整評估後，才能知道你的財務是否真的穩定
+          </p>
+          <div className="max-w-2xl mx-auto mt-6">
             <div className="bg-background/60 backdrop-blur-sm rounded-lg p-6 md:p-8 border border-border/50 shadow-sm">
               <p className="text-base md:text-lg leading-relaxed text-foreground whitespace-pre-line text-center">
                 {scoreConfig.feedback}
@@ -771,53 +785,121 @@ export function ResultsDisplay({ result, onReset }: ResultsDisplayProps) {
         </Card>
       )}
 
-      {/* 7. 個人中心引導（自我評估 → 客觀版） */}
-      <Card className="p-6 md:p-8 border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-background to-background">
-        <div className="space-y-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-xl font-semibold">下一步：登入個人中心，解鎖完整客觀評估</h3>
-            {isCamelDemo && (
-              <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800">目前顯示：駱駝範例</span>
-            )}
+      {/* 7. 你的評估還差一半 */}
+      <Card className="p-6 md:p-8 border-2 border-primary/30 bg-gradient-to-br from-primary/10 via-background to-background">
+        <div className="space-y-6">
+          {/* 標題與進度 */}
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-xl font-semibold">你的評估還差一半</h3>
+              {isCamelDemo && (
+                <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-medium text-amber-800">目前顯示：駱駝範例</span>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              你的感覺很重要，但完整的財務韌性，需要同時看見「實際狀況」
+            </p>
           </div>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            剛完成的是「自我評估版」快篩。個人中心會顯示評估總分與前後對比，並以分頁整合真實財務韌性、詐騙防禦、財務焦慮、夢想達成財務管理等工具——每項附白話說明與模擬數據，一鍵連到官方工具。
-          </p>
-          <div className="grid gap-3 md:grid-cols-2">
-            <div className="rounded-lg border bg-background/70 p-4">
-              <p className="text-sm font-semibold">總覽：先看分數，心裡有底</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                顯示最近一次自我評估總分，以及與上次的差異。
-              </p>
+
+          {/* 50% 進度條 */}
+          <div className="space-y-2 rounded-xl border border-border/60 bg-background/60 p-4">
+            <div className="flex items-start gap-3">
+              <span className="text-lg leading-none mt-0.5">✅</span>
+              <div>
+                <p className="font-medium text-sm">已完成：50% 財務韌性檢測（你的感受）</p>
+                <p className="text-xs text-muted-foreground mt-0.5">自我評估・{result.totalScore} 分・{scoreConfig.label}</p>
+              </div>
             </div>
-            <div className="rounded-lg border bg-background/70 p-4">
-              <p className="text-sm font-semibold">真實財務韌性：數字版再算細一點</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                連到更完整的評估，查看各面向分數及歷次變化。
-              </p>
-            </div>
-            <div className="rounded-lg border bg-background/70 p-4">
-              <p className="text-sm font-semibold">記帳、防詐、焦慮、夢想：同一頁找得到</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                四種工具集中一頁，每項顯示說明與模擬數據，一鍵開啟。
-              </p>
-            </div>
-            <div className="rounded-lg border bg-background/70 p-4">
-              <p className="text-sm font-semibold">不用一次做完</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                今天先看總覽也好，之後再回來記帳或做評估，知道下一步去哪就夠了。
-              </p>
+            <div className="h-px bg-border/50 mx-1" />
+            <div className="flex items-start gap-3">
+              <span className="text-lg leading-none mt-0.5">⏳</span>
+              <div>
+                <p className="font-medium text-sm text-muted-foreground">還少：現實財務韌性評估（你的實際狀況）</p>
+                <p className="text-xs text-muted-foreground mt-0.5">收入結構・緊急預備金・固定支出比例・債務風險</p>
+              </div>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button size="lg" asChild>
-              <Link href="/personal-center">
-                立即登入個人中心
-                <ArrowRight className="ml-1 h-4 w-4" />
+
+          {/* 情境問題 */}
+          <div className="space-y-2">
+            <p className="text-sm font-medium">先想一想：</p>
+            <div className="space-y-2">
+              <div className="flex items-start gap-2 rounded-lg bg-muted/50 border border-border/30 px-4 py-3">
+                <span className="text-muted-foreground shrink-0 mt-0.5">→</span>
+                <p className="text-sm">如果收入中斷 3 個月，你目前的狀況撐得住嗎？</p>
+              </div>
+              <div className="flex items-start gap-2 rounded-lg bg-muted/50 border border-border/30 px-4 py-3">
+                <span className="text-muted-foreground shrink-0 mt-0.5">→</span>
+                <p className="text-sm">當臨時支出出現時，你會需要動用存款還是借貸？</p>
+              </div>
+              <div className="flex items-start gap-2 rounded-lg bg-muted/50 border border-border/30 px-4 py-3">
+                <span className="text-muted-foreground shrink-0 mt-0.5">→</span>
+                <p className="text-sm">有些人覺得自己穩定，但實際壓力已經在累積</p>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA 按鈕 */}
+          <div className="space-y-3">
+            <Button size="lg" asChild className="w-full sm:w-auto">
+              <Link href="/personal-center?tab=resilience">
+                查看完整財務韌性
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <p className="text-sm text-muted-foreground">
-              進去後可先逛總覽與工具說明；若各站需要登入或註冊，再依畫面指示即可。
+            <p className="text-xs text-muted-foreground">
+              為了幫你保存評估結果與後續追蹤，點擊後請簡單登入（支援 Google 一鍵登入）
+            </p>
+          </div>
+        </div>
+      </Card>
+
+      {/* 8. 個人中心工具介紹 */}
+      <Card className="p-6 md:p-8 border-2 border-border/60 bg-card/80 backdrop-blur-sm">
+        <div className="space-y-5">
+          <div>
+            <h3 className="text-xl font-semibold">個人中心</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              把做過的評估、想用的工具都收在同一個地方，隨時回來看、隨時往前一步。
+            </p>
+          </div>
+
+          <div className="grid gap-2 md:grid-cols-2">
+            <div className="rounded-lg border bg-background/70 p-4">
+              <p className="text-sm font-semibold">📒 財務生活記帳助理</p>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                錢花到哪裡去？一張圖就懂。AI 幫你看出消費習慣，不用自己硬算。
+              </p>
+            </div>
+            <div className="rounded-lg border bg-background/70 p-4">
+              <p className="text-sm font-semibold">🛡️ 詐騙防禦能力</p>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                急、熟、合理的情境最容易中招。先測出自己的防詐弱點，才能真的防住。
+              </p>
+            </div>
+            <div className="rounded-lg border bg-background/70 p-4">
+              <p className="text-sm font-semibold">😮‍💨 財務焦慮</p>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                帳單來了心跳加速？先搞懂自己的壓力反應模式，焦慮才有辦法調整。
+              </p>
+            </div>
+            <div className="rounded-lg border bg-background/70 p-4">
+              <p className="text-sm font-semibold">🌟 夢想達成財務管理</p>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                買房、旅遊、換工作——大願望不只停在「好想喔」，拆成這個月做得到的小步驟。
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Button size="lg" asChild className="w-full sm:w-auto">
+              <Link href="/personal-center">
+                進入個人中心
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              不用一次做完，今天先看總覽也好，之後再回來用其他工具。
             </p>
           </div>
         </div>

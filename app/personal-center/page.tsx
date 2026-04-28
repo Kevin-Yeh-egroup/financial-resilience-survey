@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { format } from "date-fns"
 import { ArrowRight, LineChart, Sparkles } from "lucide-react"
@@ -57,7 +58,7 @@ const TOOLS: Record<string, CenterTool> = {
   },
   resilience: {
     id: "resilience",
-    title: "真實財務韌性",
+    title: "現實財務韌性",
     summary: "用問卷跟分數，把你家現在「耐不耐撞、萬一沒收入能撐多久」講得白話一點、具體一點。",
     description:
       "做完自我評估，心裡會有一個「感覺」。這裡再往前一步：用總分、六大面向及前後兩次對照，看清哪裡要先補強，要跟家人談或找資源時比較說得出重點。",
@@ -67,7 +68,7 @@ const TOOLS: Record<string, CenterTool> = {
       "把「我覺得還行」跟「分數怎麼說」放在一起看，比較不會誤判狀況。",
     ],
     href: "https://financial-resilience-assessment-too.vercel.app/personal",
-    ctaLabel: "前往真實財務韌性",
+    ctaLabel: "前往現實財務韌性",
   },
   fraud: {
     id: "fraud",
@@ -123,7 +124,7 @@ const TAB_TOOL_IDS: Record<TabValue, string[]> = {
 
 const TAB_LABELS: { value: TabValue; label: string }[] = [
   { value: "overview", label: "總覽" },
-  { value: "resilience", label: "真實財務韌性" },
+  { value: "resilience", label: "現實財務韌性" },
   { value: "fraud", label: "詐騙防禦能力" },
   { value: "anxiety", label: "財務焦慮" },
   { value: "dream", label: "夢想達成財務管理" },
@@ -236,7 +237,10 @@ function ToolHeroPanel({ tool }: { tool: CenterTool }) {
   )
 }
 
-export default function PersonalCenterPage() {
+function PersonalCenterContent() {
+  const searchParams = useSearchParams()
+  const initialTab = (searchParams.get("tab") as TabValue | null) ?? "overview"
+
   const [snapshot, setSnapshot] = useState<QuestionnaireSnapshot | null>(null)
   const [profile, setProfile] = useState<LastQuestionnaireProfile | null>(null)
 
@@ -315,7 +319,7 @@ export default function PersonalCenterPage() {
           </Card>
         </div>
 
-        <Tabs defaultValue="overview" className="w-full gap-6">
+        <Tabs defaultValue={initialTab} className="w-full gap-6">
           <TabsList className="h-auto w-full flex-wrap justify-start gap-0 rounded-none border-b border-border bg-transparent p-0">
             {TAB_LABELS.map(({ value, label }) => (
               <TabsTrigger
@@ -385,5 +389,17 @@ export default function PersonalCenterPage() {
         </Tabs>
       </div>
     </main>
+  )
+}
+
+export default function PersonalCenterPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background flex items-center justify-center">
+        <p className="text-muted-foreground text-sm">載入中…</p>
+      </main>
+    }>
+      <PersonalCenterContent />
+    </Suspense>
   )
 }

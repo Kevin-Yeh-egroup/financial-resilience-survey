@@ -1,6 +1,6 @@
 import type { DimensionScores } from "@/types/questionnaire"
 
-/** 真實財務韌性（線上工具）六面向，與自我評估版六構面一對一對應；滿分加總為 100。 */
+/** 現實財務韌性（線上工具）六面向，與自我評估版六構面一對一對應；滿分加總為 100。 */
 export const RESILIENCE_COMPARISON_ROWS = [
   {
     subjectiveKey: "收入穩定度",

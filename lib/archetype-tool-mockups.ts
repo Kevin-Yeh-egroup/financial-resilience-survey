@@ -49,7 +49,7 @@ const CAMEL_MOCKUPS: Record<PersonalCenterToolId, MockupBlock> = {
     ],
   },
   resilience: {
-    headline: "真實財務韌性 · 模擬結果",
+    headline: "現實財務韌性 · 模擬結果",
     simulatedNumbers: [],
     metrics: [
       { label: "風險等級（模擬）", value: "有風險" },
