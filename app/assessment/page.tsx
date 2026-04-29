@@ -13,11 +13,12 @@ const CAMEL_DEMO_RESULT: QuestionnaireResult = {
   level: "fragile",
   priorities: ["建立 1 個月緊急預備金", "每週固定記帳 3 天", "盤點固定支出可調整項目"],
   dimensionScores: {
-    收入穩定度: 11,
-    儲備應變力: 8,
-    債務與保障: 10,
-    金錢管理: 9,
-    資源連結: 10,
+    // 駱駝型：六面向皆落在橙燈（8–15），以可達到的合理分數表示
+    收入穩定度: 13,
+    儲備應變力: 9,
+    債務與保障: 13,
+    金錢管理: 13,
+    資源連結: 9,
     心理與規劃: 10,
   },
   structureType: "struggling",
@@ -70,6 +71,7 @@ export default function Home() {
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <Button
                   onClick={() => {
+                    saveResult(CAMEL_DEMO_RESULT.dimensionScores)
                     saveLastSnapshot(CAMEL_DEMO_RESULT.totalScore)
                     saveLastQuestionnaireProfile({
                       animalType: CAMEL_DEMO_RESULT.animalType,

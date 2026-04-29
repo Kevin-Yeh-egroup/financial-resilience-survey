@@ -59,14 +59,17 @@ export const DEMO_VERCEL_ASSESSMENT_SCORES: ObjectiveResilienceScores = {
   心理韌性: 6,
 }
 
-/** 自我評估六構面（各滿分 30）的示範原分，與上列真實面向並排可算換算%與差異 */
+/**
+ * 自我評估六構面（各滿分 30）的示範原分，對應駱駝型分佈（六面向皆為橙燈 8–15）。
+ * 當 localStorage 無實際紀錄時，作為個人中心對照表的預設展示值。
+ */
 export const DEMO_SELF_DIMENSION_SCORES = {
-  收入穩定度: 15,
-  儲備應變力: 12,
-  債務與保障: 14.1,
-  金錢管理: 16.5,
-  資源連結: 9.9,
-  心理與規劃: 18,
+  收入穩定度: 13,
+  儲備應變力: 9,
+  債務與保障: 13,
+  金錢管理: 13,
+  資源連結: 9,
+  心理與規劃: 10,
 } as const satisfies Record<SubjectiveDimensionKey, number>
 
 export function subjectivePercent(score30: number): number {
