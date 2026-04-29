@@ -271,7 +271,7 @@ function PersonalCenterContent() {
     <main className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
       <div className="container mx-auto max-w-4xl px-4 py-8 md:py-12">
         <p className="mb-6 text-center text-sm text-muted-foreground md:text-left">
-          <Link href="/" className="font-medium text-primary underline-offset-4 hover:underline">
+          <Link href="/assessment" className="font-medium text-primary underline-offset-4 hover:underline">
             ← 回到自我評估
           </Link>
         </p>
@@ -350,7 +350,7 @@ function PersonalCenterContent() {
                     {snapshot == null ? (
                       <p className="mt-4 text-sm text-muted-foreground">
                         尚未有自我評估紀錄，可先{" "}
-                        <Link href="/" className="font-medium text-primary underline-offset-4 hover:underline">
+                        <Link href="/assessment" className="font-medium text-primary underline-offset-4 hover:underline">
                           完成首測
                         </Link>
                         。

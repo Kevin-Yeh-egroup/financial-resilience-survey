@@ -1,16 +1,18 @@
 import type React from "react"
-import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import type { Metadata, Viewport } from "next"
+import { Noto_Sans_TC } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const notoSansTC = Noto_Sans_TC({
+  subsets: ["latin"],
+  variable: "--font-noto-sans",
+  weight: ["300", "400", "500", "700"],
+})
 
 export const metadata: Metadata = {
-  title: "財務韌性快速檢視 - 了解您的家庭財務健康",
-  description: "透過 10 個簡單問題，快速評估您的家庭財務韌性狀況，獲得個人化建議與支持方向。",
-  generator: "v0.app",
+  title: "財務韌性檢測 — 了解你現在的財務狀態",
+  description: "用 10 題貼近日常的問題，陪你一起把目前的財務狀況整理清楚。不用輸入金額，沒有對錯，約 3-5 分鐘完成。",
   icons: {
     icon: [
       {
@@ -30,6 +32,10 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  themeColor: "#fff6f1",
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -37,7 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-TW">
-      <body className={`font-sans antialiased`}>
+      <body className={`${notoSansTC.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>

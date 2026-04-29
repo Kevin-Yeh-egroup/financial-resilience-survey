@@ -235,8 +235,8 @@ export function PerceptionVsRealityCompare() {
         {subjectiveDims == null ? (
           <p className="rounded-lg border border-blue-200/80 bg-blue-50/80 px-4 py-3 text-sm text-blue-950 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-100">
             尚未在本站留下自我評估構面時，對照表中「自我評估」欄會先顯示<strong className="font-semibold">示範原分</strong>；請到{" "}
-            <Link href="/" className="font-medium underline underline-offset-4">
-              首頁完成自我評估
+            <Link href="/assessment" className="font-medium underline underline-offset-4">
+              前往完成自我評估
             </Link>
             後，左側會自動改為你的分數。
           </p>
